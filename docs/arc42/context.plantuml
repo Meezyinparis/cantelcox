@@ -1,0 +1,22 @@
+@startuml
+title Diagramme de contexte — CanTelcoX
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Abonné" as Abonne
+actor "Agent du\nservice client" as Agent
+actor "Régulateur" as Regulateur
+
+rectangle "<<system>>\nCanTelcoX\nBSS télécom" as System
+
+rectangle "<<external>>\nRéseau mobile\nHLR / HSS" as HLR
+rectangle "<<external>>Hub de\nportabilité" as Portability
+
+Abonne --> System : Inscription, MFA,\nactivation, commandes,\nconsultation usage
+Agent --> System : Support client,\nconsultation dossiers
+Regulateur <-- System : Rapports d'audit,\ntraçabilité
+System --> HLR : Activation / état des lignes
+System --> Portability : Portabilité MSISDN
+
+@enduml

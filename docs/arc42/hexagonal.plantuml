@@ -1,0 +1,89 @@
+@startuml
+title 5.2 — Structure interne du commerce-service (hexagonal)
+
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam shadowing false
+
+package "Adapters d'entrée" {
+  component "commerce_api.py\nAPI REST" as API
+  component "controllers\nlines_controller.py\norders_controller.py\nusage_controller.py" as Controllers
+}
+
+package "Application\n(cas d'utilisation)" {
+  component "ActivateLineUseCase" as ActivateLine
+  component "CreateOrderUseCase" as CreateOrder
+  component "GetUsageAndInvoicesUseCase" as GetUsageInvoices
+}
+
+package "Domaine\n(cœur métier)" {
+  component "LigneMobile\n(agrégat)" as Ligne
+  component "Commande\n(agrégat)" as Commande
+  component "Facture\n(agrégat)" as Facture
+  component "Forfait\n(entité)" as Forfait
+  component "MSISDN\n(value object)" as MSISDN
+  component "UsageRecord\n(entité)" as Usage
+}
+
+package "Ports\n(interfaces)" {
+  interface "LineRepositoryPort" as LineRepoPort
+  interface "OrderRepositoryPort" as OrderRepoPort
+  interface "CatalogRepositoryPort" as CatalogRepoPort
+  interface "UsageRepositoryPort" as UsageRepoPort
+  interface "InvoiceRepositoryPort" as InvoiceRepoPort
+  interface "CachePort" as CachePort
+  interface "IdentityServicePort" as IdentityPort
+}
+
+package "Adapters de sortie\nInfrastructure" {
+  component "MySQL Repository" as MySQLRepo
+  component "Redis Cache Adapter" as RedisAdapter
+  component "HTTP Client\ncustomer-identity-service" as IdentityAdapter
+}
+
+database "MySQL\nCommerce DB" as MySQL
+database "Redis\nCache catalogue / usage" as Redis
+component "customer-identity-service" as Identity
+
+API --> Controllers
+
+Controllers --> ActivateLine
+Controllers --> CreateOrder
+Controllers --> GetUsageInvoices
+
+ActivateLine --> Ligne
+CreateOrder --> Commande
+GetUsageInvoices --> Usage
+GetUsageInvoices --> Facture
+
+Ligne --> MSISDN : possède
+Ligne --> Forfait : forfait actif
+Commande --> Forfait : forfait choisi
+Facture --> Ligne : concerne
+
+ActivateLine --> LineRepoPort
+ActivateLine --> IdentityPort
+ActivateLine --> CatalogRepoPort
+
+CreateOrder --> OrderRepoPort
+CreateOrder --> CatalogRepoPort
+CreateOrder --> IdentityPort
+
+GetUsageInvoices --> UsageRepoPort
+GetUsageInvoices --> InvoiceRepoPort
+GetUsageInvoices --> CachePort
+
+LineRepoPort <|.. MySQLRepo
+OrderRepoPort <|.. MySQLRepo
+CatalogRepoPort <|.. MySQLRepo
+UsageRepoPort <|.. MySQLRepo
+InvoiceRepoPort <|.. MySQLRepo
+
+CachePort <|.. RedisAdapter
+IdentityPort <|.. IdentityAdapter
+
+MySQLRepo --> MySQL
+RedisAdapter --> Redis
+IdentityAdapter --> Identity
+
+@enduml

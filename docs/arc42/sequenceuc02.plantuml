@@ -1,0 +1,40 @@
+@startuml
+title UC-02 — Authentification & MFA sur opération sensible
+
+actor "Abonné" as A
+
+participant "API Gateway\nKrakenD" as G
+participant "Customer Identity Service" as I
+participant "Commerce Service" as C
+
+== Tentative d'opération sensible ==
+
+A -> G : POST /v1/lines/activate
+G -> C : Demande d'activation
+C --> G : MFA requis
+G --> A : MFA requis
+
+== Demande du code MFA ==
+
+A -> G : POST /v1/auth/mfa/request
+G -> I : Générer OTP
+I --> G : OTP généré
+G --> A : OTP envoyé
+
+== Validation MFA ==
+
+A -> G : POST /v1/auth/mfa/verify
+G -> I : Valider OTP
+I --> G : MFA validé + JWT
+G --> A : Authentification confirmée
+
+== Reprise de l'opération sensible ==
+
+A -> G : POST /v1/lines/activate
+G -> C : Reprendre l'activation
+C -> I : Vérifier le JWT
+I --> C : JWT valide
+C --> G : Ligne activée
+G --> A : 201 Created
+
+@enduml

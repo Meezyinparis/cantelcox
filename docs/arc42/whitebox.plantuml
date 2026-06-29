@@ -1,0 +1,22 @@
+@startuml
+title Whitebox simple — CanTelcoX
+
+component "KrakenD\nAPI Gateway" as Gateway
+
+component "customer_identity_api.py\nCustomer Identity Service" as Identity
+component "commerce_api.py\nCommerce Service" as Commerce
+
+database "MySQL 1\nIdentity DB" as DB1
+database "MySQL 2\nCommerce DB" as DB2
+database "Redis\nCache Commerce" as Redis
+
+Gateway --> Identity : /v1/customers\n/v1/auth
+Gateway --> Commerce : /v1/orders\n/v1/lines\n/v1/catalog\n/v1/usage\n/v1/invoices
+
+Identity --> DB1 : SQL
+Commerce --> DB2 : SQL
+Commerce --> Redis : cache
+
+Commerce --> Identity : vérifier client / JWT
+
+@enduml

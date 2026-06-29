@@ -1,0 +1,31 @@
+@startuml
+title Carte des contextes DDD - CanTelcoX
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+rectangle "Clients & Identité" as Identity
+rectangle "Commandes & Activations" as Orders
+rectangle "Catalogue & Offres" as Catalog
+rectangle "Lignes & Services" as Lines
+rectangle "Usage / Rating /\nFacturation" as Billing
+rectangle "Conformité & Audit" as Audit
+
+cloud "HLR / HSS" as HLR
+cloud "Hub de\nportabilité" as Portability
+
+Identity --> Orders : Customer / Supplier
+Orders --> Catalog : Conformist
+Orders --> Lines : Customer / Supplier
+Lines --> Billing : Customer / Supplier
+
+Lines --> HLR : ACL
+Lines --> Portability : ACL
+
+Identity --> Audit : journalisation
+Orders --> Audit : journalisation
+Lines --> Audit : journalisation
+Billing --> Audit : journalisation
+
+@enduml

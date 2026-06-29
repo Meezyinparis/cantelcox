@@ -1,0 +1,114 @@
+{
+  "version": 3,
+  "name": "CanTelcoX API Gateway",
+  "timeout": "5s",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "port": 8080,
+  "endpoints": [
+    {
+      "endpoint": "/v1/customers/register",
+      "method": "POST",
+      "backend": [
+        {
+          "url_pattern": "/v1/customers/register",
+          "host": ["http://customer_identity_service:5001"],
+          "timeout": "5s"
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/customers/{customer_id}",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/customers/{customer_id}",
+          "host": ["http://customer_identity_service:5001"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/auth/mfa/request",
+      "method": "POST",
+      "backend": [
+        {
+          "url_pattern": "/v1/auth/mfa/request",
+          "host": ["http://customer_identity_service:5001"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/auth/mfa/verify",
+      "method": "POST",
+      "backend": [
+        {
+          "url_pattern": "/v1/auth/mfa/verify",
+          "host": ["http://customer_identity_service:5001"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/catalog/plans",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/catalog/plans",
+          "host": ["http://commerce_service:5002"]
+        }
+      ],
+      "extra_config": {
+        "qos/ratelimit/router": {
+          "max_rate": 200,
+          "every": "1m"
+        }
+      }
+    },
+    {
+      "endpoint": "/v1/lines/activate",
+      "method": "POST",
+      "backend": [
+        {
+          "url_pattern": "/v1/lines/activate",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/orders",
+      "method": "POST",
+      "backend": [
+        {
+          "url_pattern": "/v1/orders",
+          "host": ["http://commerce_service:5002"]
+        }
+      ],
+      "extra_config": {
+        "qos/ratelimit/router": {
+          "max_rate": 200,
+          "every": "1m"
+        }
+      }
+    },
+    {
+      "endpoint": "/v1/usage/{line_id}",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/usage/{line_id}",
+          "host": ["http://commerce_service:5002"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/invoices/{invoice_id}",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/invoices/{invoice_id}",
+          "host": ["http://commerce_service:5002"]
+        }
+      ]
+    }
+  ]
+}

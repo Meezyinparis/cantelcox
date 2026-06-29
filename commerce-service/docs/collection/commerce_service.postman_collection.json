@@ -1,0 +1,220 @@
+{
+  "info": {
+    "_postman_id": "6c5cf0f3-commerce-service",
+    "name": "CanTelcoX - Commerce Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "6052895"
+  },
+  "item": [
+    {
+      "name": "/health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/health",
+          "host": ["{{baseURL}}"],
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/catalog/plans",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/catalog/plans",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "catalog", "plans"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/catalog/plans/:id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/catalog/plans/1",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "catalog", "plans", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/lines/activate",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <jwt>"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customer_id\": 1,\n    \"msisdn\": \"5145550003\",\n    \"sim_number\": \"SIM000003\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/v1/lines/activate",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "lines", "activate"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/lines/:id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/lines/1",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "lines", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/customers/:id/lines",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/customers/1/lines",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "customers", "1", "lines"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/orders",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <jwt>"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "abc-123"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"customer_id\": 1,\n    \"line_id\": 1,\n    \"items\": [\n        {\n            \"plan_id\": 2,\n            \"quantity\": 1\n        }\n    ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/v1/orders",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "orders"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/orders/:id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/orders/1",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "orders", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/usage/:lineId",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/usage/1",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "usage", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/invoices/:id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/invoices/1",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "invoices", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/lines/:id/invoices",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/v1/lines/1/invoices",
+          "host": ["{{baseURL}}"],
+          "path": ["v1", "lines", "1", "invoices"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/metrics",
+          "host": ["{{baseURL}}"],
+          "path": ["metrics"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "http://localhost:5002"
+    }
+  ]
+}

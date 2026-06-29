@@ -1,0 +1,43 @@
+@startuml
+title Idempotence & exactly-once à l'exécution
+
+actor "Abonné" as A
+
+participant "API Gateway\nKrakenD" as G
+participant "Commerce Service" as C
+participant "Audit Log\nappend-only" as Audit
+
+== Double soumission de commande avec Idempotency-Key ==
+
+A -> G : POST /v1/orders\nIdempotency-Key: abc-123
+G -> C : Créer commande\nIdempotency-Key: abc-123
+C -> C : Vérifier si la clé existe
+
+alt Première soumission
+    C -> C : Créer commande
+    C -> Audit : Ajouter événement OrderCreated
+    C --> G : 201 Created\norderId=ORD-001
+    G --> A : 201 Created\norderId=ORD-001
+else Double soumission
+    A -> G : POST /v1/orders\nIdempotency-Key: abc-123
+    G -> C : Créer commande\nIdempotency-Key: abc-123
+    C -> C : Retrouver réponse associée à la clé
+    C --> G : 200 OK\nréponse déjà créée
+    G --> A : 200 OK\norderId=ORD-001
+end
+
+== Écriture de facturation exactly-once ==
+
+C -> C : Générer écriture facture\nbillingEventId=EVT-001
+C -> C : Vérifier billingEventId unique
+
+alt Première écriture
+    C -> C : Créer ligne de facturation
+    C -> Audit : Ajouter événement BillingRecorded
+    C --> G : Facturation enregistrée
+else Événement déjà traité
+    C -> C : Détecter doublon
+    C --> G : Ignoré / résultat déjà appliqué
+end
+
+@enduml

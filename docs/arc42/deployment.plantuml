@@ -1,0 +1,38 @@
+@startuml
+title Vue de déploiement — CanTelcoX
+
+
+  node "Réseau public" {
+    component "KrakenD\nAPI Gateway\n:8080\n/health" as Gateway
+    component "Prometheus\n:9090" as Prometheus
+    component "Grafana\n:3000" as Grafana
+    component "Locust\n:8089" as Locust
+  }
+
+  node "Réseau applicatif interne" {
+    component "customer_identity_api.py\nCustomer Identity Service\n:5001\n/health" as CustomerService
+    component "commerce_api.py\nCommerce Service\n:5002\n/health" as CommerceService
+    database "Redis\n:6379\nredis-cli ping" as Redis
+  }
+
+  node "Réseau données interne" {
+    database "MySQL 1\nidentity_db\nvolume: mysql1_data\nhealthcheck: mysqladmin ping" as MySQL1
+    database "MySQL 2\ncommerce_db\nvolume: mysql2_data\nhealthcheck: mysqladmin ping" as MySQL2
+  }
+
+
+
+
+Gateway --> CustomerService : /v1/customers/*\n/v1/auth/*
+Gateway --> CommerceService : /v1/catalog/*\n/v1/orders/*\n/v1/lines/*\n/v1/usage/*
+
+CustomerService --> MySQL1 : SQL
+CommerceService --> MySQL2 : SQL
+CommerceService --> Redis : cache catalogue / usage
+
+Prometheus --> CustomerService : scrape /metrics
+Prometheus --> CommerceService : scrape /metrics
+Grafana --> Prometheus : datasource
+Locust --> Gateway : tests de charge
+
+@enduml

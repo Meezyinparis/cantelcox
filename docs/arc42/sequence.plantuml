@@ -1,0 +1,58 @@
+@startuml
+title Scénario E2E — Inscription, MFA, activation, souscription et consultation d'usage
+
+actor "Abonné" as A
+
+participant "API Gateway\nKrakenD" as G
+participant "Customer Identity Service" as I
+participant "Commerce Service" as C
+participant "Redis" as R
+participant "HLR/HSS simulé" as HLR
+
+== UC-01 — Inscription ==
+
+A -> G : POST /v1/customers/register
+G -> I : Créer le profil abonné
+I --> G : Profil créé
+G --> A : 201 Created
+
+== UC-02 — Authentification & MFA ==
+
+A -> G : POST /v1/auth/mfa/request
+G -> I : Générer OTP
+I --> G : OTP généré
+G --> A : OTP envoyé
+
+A -> G : POST /v1/auth/mfa/verify
+G -> I : Valider OTP
+I --> G : MFA validé + JWT
+G --> A : Session sécurisée
+
+== UC-03 — Activation d'une ligne ==
+
+A -> G : POST /v1/lines/activate
+G -> C : Activer une ligne
+C -> I : Vérifier le JWT
+I --> C : Client authentifié
+C -> HLR : Provisionner la ligne
+HLR --> C : Ligne activée
+C --> G : Activation réussie
+G --> A : 201 Created
+
+== UC-04 — Consultation d'usage et des factures ==
+
+A -> G : GET /v1/usage/{lineId}
+G -> C : Consulter usage et factures
+C -> R : Lire le cache
+R --> C : Usage
+C --> G : Usage + factures disponibles
+G --> A : Usage et factures affichés
+
+== UC-05 — Souscription à un forfait ==
+
+A -> G : POST /v1/orders
+G -> C : Créer une commande
+C --> G : Commande créée
+G --> A : Confirmation de la commande
+
+@enduml

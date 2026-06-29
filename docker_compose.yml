@@ -1,0 +1,158 @@
+services:
+  customer_identity_service:
+    build: ./customer-identity-service
+    container_name: customer_identity_service
+    env_file:
+      - .env
+    volumes:
+      - ./customer-identity-service:/app
+    ports:
+      - "5001:5001"
+    networks:
+      - cantelcox-network
+    depends_on:
+      mysql_identity:
+        condition: service_healthy
+
+  commerce_service:
+    build: ./commerce-service
+    container_name: commerce_service
+    env_file:
+      - .env
+    volumes:
+      - ./commerce-service:/app
+    ports:
+      - "5002:5002"
+    networks:
+      - cantelcox-network
+    depends_on:
+      mysql_commerce:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      customer_identity_service:
+        condition: service_started
+
+  mysql_identity:
+    image: mysql:8.4.7
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: identity_db
+      MYSQL_USER: identity
+      MYSQL_PASSWORD: identity
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_identity_data:/var/lib/mysql
+      - ./customer-identity-service/db-init:/docker-entrypoint-initdb.d
+    networks:
+      - cantelcox-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot"]
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  mysql_commerce:
+    image: mysql:8.4.7
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: commerce_db
+      MYSQL_USER: commerce
+      MYSQL_PASSWORD: commerce
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_commerce_data:/var/lib/mysql
+      - ./commerce-service/db-init:/docker-entrypoint-initdb.d
+    networks:
+      - cantelcox-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot"]
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - cantelcox-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  krakend:
+    image: devopsfaith/krakend:2.7
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./krakend/krakend.json:/etc/krakend/krakend.json
+    networks:
+      - cantelcox-network
+    depends_on:
+      - customer_identity_service
+      - commerce_service
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    networks:
+      - cantelcox-network
+    depends_on:
+      - customer_identity_service
+      - commerce_service
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - cantelcox-network
+    depends_on:
+      - prometheus
+
+  locust:
+    image: locustio/locust
+    container_name: locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./locust:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --host=http://api-gateway:8080
+    networks:
+      - cantelcox-network
+    depends_on:
+      - krakend
+
+networks:
+  cantelcox-network:
+    driver: bridge
+
+volumes:
+  mysql_identity_data:
+  mysql_commerce_data:
+  prometheus_data:
+  grafana_data:
