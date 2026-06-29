@@ -23,6 +23,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Creer fichier .env
+        run: |
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_NAME=customer_identity_db" >> .env
+          echo "DB_USER=customer_identity" >> .env
+          echo "DB_PASS=customer_identity" >> .env
+          echo "REDIS_HOST=127.0.0.1" >> .env
+          echo "REDIS_PORT=6379" >> .env
+          echo "REDIS_DB=0" >> .env
+
       - name: Run tests
         working-directory: customer-identity-service/src
         run: pytest
@@ -43,6 +54,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          
+      - name: Creer fichier .env
+        run: |
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_NAME=commerce_db" >> .env
+          echo "DB_USER=commerce" >> .env
+          echo "DB_PASS=commerce" >> .env
+          echo "REDIS_HOST=127.0.0.1" >> .env
+          echo "REDIS_PORT=6379" >> .env
+          echo "REDIS_DB=0" >> .env
 
       - name: Run tests
         working-directory: commerce-service/src
