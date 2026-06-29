@@ -30,6 +30,9 @@ jobs:
           echo "IDENTITY_DB_NAME=customer_identity_db" >> .env
           echo "IDENTITY_DB_USER=customer_identity" >> .env
           echo "IDENTITY_DB_PASS=customer_identity" >> .env
+          echo "JWT_SECRET=CantelcoXLOG4302026SecretKey" >> .env
+          echo "JWT_ALGORITHM=HS256" >> .env
+          echo "JWT_EXPIRATION_MINUTES=60" >> .env
 
       - name: Run tests
         working-directory: customer-identity-service/src
@@ -51,7 +54,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          
+
       - name: Creer fichier .env
         run: |
           echo "COMMERCE_DB_HOST=127.0.0.1" >> .env
