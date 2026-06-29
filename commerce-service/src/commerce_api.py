@@ -120,10 +120,6 @@ def delete_line_id(line_id):
     return remove_line(line_id)
 
 
-# ============================================================
-# Order routes
-# ============================================================
-
 @app.post("/v1/orders")
 def post_orders():
     """Create a new order"""
