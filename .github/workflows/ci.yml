@@ -25,14 +25,11 @@ jobs:
 
       - name: Creer fichier .env
         run: |
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_NAME=customer_identity_db" >> .env
-          echo "DB_USER=customer_identity" >> .env
-          echo "DB_PASS=customer_identity" >> .env
-          echo "REDIS_HOST=127.0.0.1" >> .env
-          echo "REDIS_PORT=6379" >> .env
-          echo "REDIS_DB=0" >> .env
+          echo "IDENTITY_DB_HOST=127.0.0.1" >> .env
+          echo "IDENTITY_DB_PORT=3306" >> .env
+          echo "IDENTITY_DB_NAME=customer_identity_db" >> .env
+          echo "IDENTITY_DB_USER=customer_identity" >> .env
+          echo "IDENTITY_DB_PASS=customer_identity" >> .env
 
       - name: Run tests
         working-directory: customer-identity-service/src
@@ -57,11 +54,11 @@ jobs:
           
       - name: Creer fichier .env
         run: |
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_NAME=commerce_db" >> .env
-          echo "DB_USER=commerce" >> .env
-          echo "DB_PASS=commerce" >> .env
+          echo "COMMERCE_DB_HOST=127.0.0.1" >> .env
+          echo "COMMERCE_DB_PORT=3306" >> .env
+          echo "COMMERCE_DB_NAME=commerce_db" >> .env
+          echo "COMMERCE_DB_USER=commerce" >> .env
+          echo "COMMERCE_DB_PASS=commerce" >> .env
           echo "REDIS_HOST=127.0.0.1" >> .env
           echo "REDIS_PORT=6379" >> .env
           echo "REDIS_DB=0" >> .env
