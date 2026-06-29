@@ -14,80 +14,42 @@ def home():
     return jsonify({"service": "CustomerIdentityService", "status": "running"})
 
 
-
 @app.get("/health")
 def health():
     """Return OK if app is up and running"""
     return jsonify({"status": "healthy"})
 
 
-@app.route("/v1/customers/register", methods=["POST"])
+@app.post("/v1/customers/register")
 def post_register_customer():
     """Register a new customer"""
     logger.debug("Endpoint: POST /v1/customers/register")
-    try:
-        result = create_customer(request)
-        return jsonify(result), 201
-    except Exception as e:
-        logger.error(e)
-        return jsonify({
-            "code": "CUSTOMER_REGISTRATION_ERROR",
-            "message": str(e),
-            "traceId": request.headers.get("X-Request-Id")
-        }), 400
+    return create_customer(request)
 
 
-@app.route("/v1/customers/<int:customer_id>", methods=["GET"])
+@app.get("/v1/customers/<int:customer_id>")
 def get_customer_details(customer_id):
     """Get customer details by ID"""
     logger.debug(f"Endpoint: GET /v1/customers/{customer_id}")
-    try:
-        result = get_customer(customer_id)
-        return jsonify(result), 200
-    except Exception as e:
-        logger.error(e)
-        return jsonify({
-            "code": "CUSTOMER_NOT_FOUND",
-            "message": str(e),
-            "traceId": request.headers.get("X-Request-Id")
-        }), 404
+    return get_customer(customer_id)
 
 
-@app.route("/v1/auth/mfa/request", methods=["POST"])
+@app.post("/v1/auth/mfa/request")
 def post_request_mfa():
     """Request an MFA/OTP code"""
     logger.debug("Endpoint: POST /v1/auth/mfa/request")
-    try:
-        result = request_mfa(request)
-        return jsonify(result), 200
-    except Exception as e:
-        logger.error(e)
-        return jsonify({
-            "code": "MFA_REQUEST_ERROR",
-            "message": str(e),
-            "traceId": request.headers.get("X-Request-Id")
-        }), 400
+    return request_mfa(request)
 
 
-@app.route("/v1/auth/mfa/verify", methods=["POST"])
+@app.post("/v1/auth/mfa/verify")
 def post_verify_mfa():
     """Verify an MFA/OTP code"""
     logger.debug("Endpoint: POST /v1/auth/mfa/verify")
-    try:
-        result = verify_mfa(request)
-        return jsonify(result), 200
-    except Exception as e:
-        logger.error(e)
-        return jsonify({
-            "code": "MFA_VERIFY_ERROR",
-            "message": str(e),
-            "traceId": request.headers.get("X-Request-Id")
-        }), 401
+    return verify_mfa(request)
 
 
 @app.errorhandler(404)
 def handle_404(error):
-    """Handle 404 errors with JSON response"""
     logger.error(error)
     return jsonify({
         "code": "NOT_FOUND",
@@ -98,8 +60,7 @@ def handle_404(error):
 
 @app.errorhandler(500)
 def handle_500(error):
-    """Handle 500 errors with JSON response"""
-    logger.error(error)
+    logger.exception(error)
     return jsonify({
         "code": "INTERNAL_ERROR",
         "message": "Erreur interne du service",
@@ -108,4 +69,4 @@ def handle_500(error):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001)
