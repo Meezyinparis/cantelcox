@@ -34,11 +34,10 @@ jobs:
       - name: Démarrer les conteneurs
         run: docker compose -f docker_compose.yml up -d --build
 
-      - name: Attendre MySQL
+      - name: Attendre MySQL Identify
         run: |
-          sleep 10
           timeout=60
-          until docker compose exec -T mysql mysqladmin ping -h localhost -u root -proot --silent; do
+          until docker compose -f docker_compose.yml exec -T mysql_identify mysqladmin ping -h localhost -u root -proot --silent; do
             echo "Waiting for MySQL..."
             sleep 3
             timeout=$((timeout - 3))
@@ -47,7 +46,6 @@ jobs:
               exit 1
             fi
           done
-          sleep 5
 
       - name: Exécuter tests Customer Identity
         run: docker compose -f docker_compose.yml exec -T customer_identity_service pytest
@@ -85,11 +83,10 @@ jobs:
       - name: Démarrer les conteneurs
         run: docker compose -f docker_compose.yml up -d --build
 
-      - name: Attendre MySQL
+      - name: Attendre MySQL Commerce
         run: |
-          sleep 10
           timeout=60
-          until docker compose exec -T mysql mysqladmin ping -h localhost -u root -proot --silent; do
+          until docker compose -f docker_compose.yml exec -T mysql_commerce mysqladmin ping -h localhost -u root -proot --silent; do
             echo "Waiting for MySQL..."
             sleep 3
             timeout=$((timeout - 3))
@@ -98,7 +95,6 @@ jobs:
               exit 1
             fi
           done
-          sleep 5
 
       - name: Exécuter tests Commerce
         run: docker compose -f docker_compose.yml exec -T commerce_service pytest
