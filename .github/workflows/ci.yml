@@ -34,10 +34,10 @@ jobs:
       - name: Démarrer les conteneurs
         run: docker compose -f docker_compose.yml up -d --build
 
-      - name: Attendre MySQL Identify
+      - name: Attendre MySQL Identity
         run: |
           timeout=60
-          until docker compose -f docker_compose.yml exec -T mysql_identify mysqladmin ping -h localhost -u root -proot --silent; do
+          until docker compose -f docker_compose.yml exec -T mysql_identity mysqladmin ping -h localhost -u root -proot --silent; do
             echo "Waiting for MySQL..."
             sleep 3
             timeout=$((timeout - 3))
