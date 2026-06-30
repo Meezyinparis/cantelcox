@@ -28,6 +28,7 @@ def test_catalog_plans(client):
 
     assert response.status_code == 200
     plans = response.get_json()
+    print(plans)
     assert isinstance(plans, list)
     assert len(plans) > 0
     assert "id" in plans[0]

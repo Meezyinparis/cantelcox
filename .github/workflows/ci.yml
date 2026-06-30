@@ -97,6 +97,22 @@ jobs:
             fi
           done
 
+      - name: Attendre Redis
+        run: |
+          timeout=60
+          until docker compose -f docker_compose.yml exec -T redis redis-cli ping; do
+            echo "Waiting for Redis..."
+            sleep 3
+            timeout=$((timeout - 3))
+            if [ $timeout -le 0 ]; then
+              echo "Redis failed to start"
+              exit 1
+            fi
+          done
+
+      - name: Logs Commerce avant tests
+        run: docker compose -f docker_compose.yml logs commerce_service
+
       - name: Exécuter tests Commerce
         run: docker compose -f docker_compose.yml exec -T commerce_service pytest
 
