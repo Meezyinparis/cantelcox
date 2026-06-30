@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO customers (first_name, last_name, email, phone_number, identity_verified, status)
+INSERT INTO customers (first_name, last_name, email, phone_number, status)
 VALUES
 ('Alice', 'Tremblay', 'alice@example.com', '+15145550001', TRUE, 'ACTIVE'),
 ('Marc', 'Gagnon', 'marc@example.com', '+15145550002', TRUE, 'ACTIVE');
