@@ -1,3 +1,4 @@
+import requests
 from flask import jsonify
 
 from commands.write_order import add_order, delete_order
@@ -5,6 +6,7 @@ from queries.read_order import get_order_by_id
 
 
 def create_order(request):
+    """Create order"""
 
     payload = request.get_json() or {}
 
@@ -13,7 +15,39 @@ def create_order(request):
     idempotency_key = payload.get("idempotency_key")
     items = payload.get("items")
 
+    if not customer_id or not line_id or not idempotency_key or not items:
+        return jsonify({
+            "error": "customer_id, line_id, idempotency_key and items are required"
+        }), 400
+
     try:
+        customer_response = requests.get(
+            f"http://krakend:8080/v1/customers/{customer_id}",
+            timeout=5
+        )
+
+        if customer_response.status_code == 404:
+            return jsonify({
+                "error": "Customer not found"
+            }), 404
+
+        if customer_response.status_code != 200:
+            return jsonify({
+                "error": "Could not validate customer"
+            }), 502
+
+        customer = customer_response.json()
+
+        if not customer.get("identity_verified"):
+            return jsonify({
+                "error": "Customer identity is not verified"
+            }), 403
+
+        if customer.get("status") != "ACTIVE":
+            return jsonify({
+                "error": "Customer account is not active"
+            }), 403
+
         order_id = add_order(
             customer_id,
             line_id,
@@ -24,6 +58,11 @@ def create_order(request):
         return jsonify({
             "order_id": order_id
         }), 201
+
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Identity service unavailable"
+        }), 503
 
     except Exception as e:
         return jsonify({

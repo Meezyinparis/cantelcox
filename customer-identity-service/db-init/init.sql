@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS customers (
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     phone_number VARCHAR(30),
+    identity_verified BOOLEAN NOT NULL DEFAULT FALSE,
     status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS user_accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO customers (first_name, last_name, email, phone_number, status)
+INSERT INTO customers (first_name, last_name, email, phone_number, identity_verified, status)
 VALUES
 ('Alice', 'Tremblay', 'alice@example.com', '+15145550001', TRUE, 'ACTIVE'),
 ('Marc', 'Gagnon', 'marc@example.com', '+15145550002', TRUE, 'ACTIVE');

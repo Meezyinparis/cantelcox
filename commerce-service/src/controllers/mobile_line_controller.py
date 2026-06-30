@@ -7,7 +7,6 @@ from queries.read_mobile_line import (
     get_mobile_lines_by_customer_id
 )
 
-
 def activate_line(request):
     """Activate mobile line"""
 
@@ -17,7 +16,31 @@ def activate_line(request):
     msisdn = payload.get("msisdn")
     sim_number = payload.get("sim_number")
 
+    if not customer_id or not msisdn or not sim_number:
+        return jsonify({
+            "error": "customer_id, msisdn and sim_number are required"
+        }), 400
+
     try:
+        customer_response = requests.get(
+            f"http://krakend:8080/v1/customers/{customer_id}",
+            timeout=5
+        )
+
+        if customer_response.status_code == 404:
+            return jsonify({"error": "Customer not found"}), 404
+
+        if customer_response.status_code != 200:
+            return jsonify({"error": "Could not validate customer"}), 502
+
+        customer = customer_response.json()
+
+        if not customer.get("identity_verified"):
+            return jsonify({"error": "Customer identity is not verified"}), 403
+
+        if customer.get("status") != "ACTIVE":
+            return jsonify({"error": "Customer account is not active"}), 403
+
         line_id = activate_mobile_line(
             customer_id,
             msisdn,
@@ -25,6 +48,9 @@ def activate_line(request):
         )
 
         return jsonify({"line_id": line_id}), 201
+
+    except requests.exceptions.RequestException:
+        return jsonify({"error": "Identity service unavailable"}), 503
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
