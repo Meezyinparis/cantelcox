@@ -483,7 +483,7 @@ En Phase 1, les services communiquent entre eux avec des API REST en passant par
 | **Aspect**      | **Convention retenue**                                                                                                                                   |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Versionnement   | `/v1/...`                                                                                                                                                |
-| Codes HTTP      | `200 OK`, `201 Created`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `409 Conflict`, `422 Unprocessable Entity`, `500 Internal Server Error` |
+| Codes HTTP      | `200 OK`, `201 Created`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `409 Conflict`, `500 Internal Server Error` |
 | Format d’erreur | JSON : `{ "code": "...", "message": "...", "traceId": "..." }`                                                                                           |
 | Documentation   | OpenAPI/Swagger + collection Postman (Annexe A)                                                                                                          |
 
@@ -606,8 +606,8 @@ _[À compléter — séquences : double soumission de commande (idempotency-key)
 _[À compléter — diagramme de déploiement : conteneurs, réseaux, volumes, healthchecks — insérer la figure]_
 
 ## 7.2 API Gateway
-
-| **Capacité Gateway** | **Configuration**                                                                                                                                                             |
+**Configuration**                                                                                                                     
+| **Capacité Gateway** |                                         |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Routage dynamique    | Routes `/v1/auth/*` et `/v1/customers/*` vers `customer-identity-service`; routes `/v1/catalog/*`, `/v1/orders/*`, `/v1/lines/*` et `/v1/usage/*` vers `commerce-service`.    |
 | En-têtes             | Transmission des headers `Authorization`, `X-Request-Id` et `Idempotency-Key`. Une clé API (`X-API-Key`) peut être ajoutée ultérieurement pour protéger l'accès à la Gateway. |
@@ -619,7 +619,7 @@ _[À compléter — diagramme de déploiement : conteneurs, réseaux, volumes, h
 ## 7.3 Load balancing & tolérance aux pannes
 
 _[À compléter — amont (NGINX/HAProxy/Traefik), stratégie d’équilibrage, plan de test N = 1..4 et kill d’instance (résultats au §10.6)]_
-Le load balancing est fait avec **NGINX** devant les instances du `commerce-service`. La stratégie utilisée est **round-robin**. Les tests seront réalisés avec **N = 1 à 4 instances**, en mesurant RPS, P95, erreurs et saturation. Un test `docker kill` sur une instance permettra de vérifier que le trafic continue d’être servi par les instances restantes. Les résultats sont documentés au §10.6.
+
 
 # 8. Concepts transversaux
 
@@ -652,12 +652,6 @@ Le load balancing est fait avec **NGINX** devant les instances du `commerce-serv
 ## 8.1 Persistance & intégrité
 
 _[À compléter — choix ORM/DAO, transactions, contraintes (unicité MSISDN, FK profils ↔ lignes, index), migrations reproductibles, données seed (schéma détaillé en Annexe B)]_
-
-La persistance est gérée avec un ORM afin de simplifier l'accès aux données et de garder une séparation claire entre le domaine et la base de données. Chaque microservice possède sa propre base MySQL : `identity_db` pour les profils, comptes et MFA, et `commerce_db` pour les lignes, forfaits, commandes, usages et factures. Les transactions sont utilisées pour les opérations critiques comme la création d'une commande, l'activation d'une ligne et la génération d'une facture.
-
-Les contraintes principales sont l'unicité du courriel pour les comptes, l'unicité du MSISDN pour les lignes mobiles, les clés étrangères entre les entités liées, ainsi que des index sur les champs souvent utilisés (`customer_id`, `line_id`, `order_id`, `billing_cycle`). Les commandes et activations utilisent une `idempotency_key` pour éviter les doublons. La facturation utilise une contrainte unique sur `(customer_id, line_id, billing_cycle)` afin d'assurer une écriture unique par cycle.
-
-Les migrations sont versionnées et reproductibles afin de recréer le schéma automatiquement dans Docker. Des données seed sont fournies pour la démonstration : abonnés de test, forfaits, options, lignes mobiles, usages simulés et factures exemples. Le schéma détaillé est présenté en Annexe B.
 
 ## 8.2 Idempotence (commandes & activations)
 
@@ -693,7 +687,7 @@ Des contrôles de base sont mis en place pour limiter les fraudes les plus coura
 
 ## 8.7 Gestion d'erreurs & versionnement
 
-Toutes les API utilisent un format d'erreur JSON commun contenant un `code`, un `message` et un `traceId` afin de faciliter le débogage et la traçabilité. Les erreurs sont mappées aux codes HTTP appropriés (`400`, `401`, `404`, `409`, `422`, `500`) et le même format est utilisé par tous les microservices. Les API sont versionnées avec le préfixe `/v1` afin de permettre des évolutions sans casser les clients existants.
+Les API utilisent un format d'erreur JSON uniforme afin de retourner des réponses cohérentes entre les microservices. Les erreurs sont associées aux codes HTTP appropriés (400, 401, 404, 409 et 500) et les réponses peuvent contenir un code, un message ainsi qu'un traceId lorsque disponible pour faciliter le débogage et la traçabilité. Toutes les API sont versionnées avec le préfixe /v1, ce qui permet de faire évoluer les services sans briser la compatibilité avec les clients existants.
 
 ## 8.8 Observabilité (4 Golden Signals)
 
@@ -711,10 +705,12 @@ Logs structurés + Prometheus + dashboards Grafana ; captures au §10.5.
 _[À compléter — endpoints mis en cache (catalogue de forfaits, consultation usage), TTL, invalidation lors des mises à jour catalogue, risque de données périmées (stale) — gains chiffrés au §10.7]_
 Les données les plus consultées sont mises en cache dans Redis afin de réduire la charge sur MySQL et d'améliorer les temps de réponse.
 
-| **Endpoint**             | **TTL** | **Invalidation**                                                                        | **Risque de données périmées**                                         |
-| ------------------------ | ------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `GET /v1/catalog/plans`  | 10 min  | À chaque modification du catalogue (création, modification ou suppression d'un forfait) | Faible : un ancien forfait peut être affiché pendant quelques minutes. |
-| `GET /v1/usage/{msisdn}` | 1 min   | À chaque mise à jour de la consommation ou expiration du TTL                            | Faible : l'usage affiché peut avoir jusqu'à une minute de retard.      |
+| **Endpoint**                       | **TTL** | **Invalidation**                                                                 | **Risque de données périmées**                                                                             |
+| ---------------------------------- | ------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `GET /v1/catalog/plans`            | 10 min  | À chaque création, modification ou suppression d'un forfait.                     | Faible : un ancien forfait peut être affiché pendant quelques minutes.                                     |
+| `GET /v1/usage/{line_id}`          | 1 min   | À chaque mise à jour de la consommation ou à l'expiration du TTL.                | Faible : l'usage affiché peut avoir jusqu'à une minute de retard.                                          |
+| `GET /v1/lines/{line_id}/invoices` | 5 min   | À la création, au paiement, à la suppression ou à la régénération d'une facture. | Faible : une facture récente ou un changement de statut peut être visible avec quelques minutes de retard. |
+
 
 # 9. Décisions d’architecture (ADR)
 
@@ -788,19 +784,24 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 >
 > ☐ Couverture ≥ 80 % sur le domaine critique ; ≥ 1 scénario E2E via la Gateway.
 
-## 10.1 Arbre de qualité
+### 10.1 Arbre de qualité
 
-_[À compléter — arbre de qualité : performance, disponibilité, sécurité, auditabilité, maintenabilité (priorisation)]_
+| Priorité | Qualité | Objectif | Scénario mesurable |
+|---|---|---|---|
+| 1 | Performance | Garder les API rapides sous charge nominale | UC-04 et UC-05 doivent rester sous une latence P95 ≤ 500 ms. |
+| 2 | Disponibilité | Continuer à servir les requêtes malgré une panne partielle | Si une instance du commerce-service tombe, les autres instances doivent continuer à répondre via le load balancer. |
+| 3 | Sécurité | Protéger les opérations sensibles | Les opérations comme l’activation de ligne et le MFA exigent un JWT/MFA valide. |
+| 4 | Auditabilité | Garder une trace des opérations importantes | Les activations, commandes et factures sont journalisées dans un audit log append-only. |
+| 5 | Maintenabilité | Faciliter l’évolution du système | Les services sont séparés par domaine, versionnés en `/v1`, documentés avec Swagger/OpenAPI et testés en CI. |
 
 ## 10.2 Scénarios de qualité
-
-| **Attribut**            | **Stimulus**                                | **Réponse attendue / mesure**     |
-| ----------------------- | ------------------------------------------- | --------------------------------- |
-| Performance             | Consultation usage à cadence élevée (UC-04) | P95 ≤ 500 ms                      |
-| Capacité                | Montée en charge                            | ≥ 600 ops/s avant saturation      |
-| Disponibilité           | Kill d’une instance en charge               | Maintien de 95 % de disponibilité |
-| Sécurité                | Opération sensible sans MFA                 | Refus + journalisation            |
-| _[À compléter — autre]_ | _[À compléter — …]_                         | _[À compléter — …]_               |
+| **Attribut** | **Stimulus** | **Réponse attendue / mesure** |
+| ------------ | ------------ | ----------------------------- |
+| Performance | Consultation usage à cadence élevée (UC-04) | P95 ≤ 500 ms |
+| Capacité | Montée en charge | ≥ 600 ops/s avant saturation |
+| Disponibilité | Kill d’une instance en charge | Maintien de 95 % de disponibilité |
+| Sécurité | Opération sensible sans MFA | Refus + journalisation |
+| Auditabilité | Création d’une commande, activation ou facture | Événement écrit dans `audit_logs` avec traceId |_               |
 
 ## 10.3 Cibles NFR & résultats
 

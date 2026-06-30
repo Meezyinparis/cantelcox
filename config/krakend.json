@@ -1,7 +1,7 @@
 {
   "version": 3,
   "name": "CanTelcoX API Gateway",
-  "timeout": "5s",
+  "timeout": "3s",
   "cache_ttl": "300s",
   "output_encoding": "json",
   "port": 8080,
@@ -12,8 +12,7 @@
       "backend": [
         {
           "url_pattern": "/health",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -23,8 +22,7 @@
       "backend": [
         {
           "url_pattern": "/health",
-          "host": ["http://customer_identity_service:5001"],
-          "timeout": "5s"
+          "host": ["http://customer_identity_service:5001"]
         }
       ]
     },
@@ -35,8 +33,7 @@
       "backend": [
         {
           "url_pattern": "/v1/customers/register",
-          "host": ["http://customer_identity_service:5001"],
-          "timeout": "5s"
+          "host": ["http://customer_identity_service:5001"]
         }
       ]
     },
@@ -46,8 +43,7 @@
       "backend": [
         {
           "url_pattern": "/v1/customers/{customer_id}",
-          "host": ["http://customer_identity_service:5001"],
-          "timeout": "5s"
+          "host": ["http://customer_identity_service:5001"]
         }
       ]
     },
@@ -57,8 +53,7 @@
       "backend": [
         {
           "url_pattern": "/v1/auth/mfa/request",
-          "host": ["http://customer_identity_service:5001"],
-          "timeout": "5s"
+          "host": ["http://customer_identity_service:5001"]
         }
       ]
     },
@@ -68,8 +63,7 @@
       "backend": [
         {
           "url_pattern": "/v1/auth/mfa/verify",
-          "host": ["http://customer_identity_service:5001"],
-          "timeout": "5s"
+          "host": ["http://customer_identity_service:5001"]
         }
       ]
     },
@@ -80,13 +74,12 @@
       "backend": [
         {
           "url_pattern": "/v1/catalog/plans",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ],
       "extra_config": {
         "qos/ratelimit/router": {
-          "max_rate": 200,
+          "max_rate": 100,
           "every": "1m"
         }
       }
@@ -97,8 +90,7 @@
       "backend": [
         {
           "url_pattern": "/v1/catalog/plans/{plan_id}",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -110,8 +102,7 @@
       "backend": [
         {
           "url_pattern": "/v1/lines/activate",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -121,8 +112,7 @@
       "backend": [
         {
           "url_pattern": "/v1/lines/{line_id}",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -132,8 +122,7 @@
       "backend": [
         {
           "url_pattern": "/v1/customers/{customer_id}/lines",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -145,13 +134,12 @@
       "backend": [
         {
           "url_pattern": "/v1/orders",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ],
       "extra_config": {
         "qos/ratelimit/router": {
-          "max_rate": 200,
+          "max_rate": 100,
           "every": "1m"
         }
       }
@@ -162,8 +150,7 @@
       "backend": [
         {
           "url_pattern": "/v1/orders/{order_id}",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -174,8 +161,7 @@
       "backend": [
         {
           "url_pattern": "/v1/usage/{line_id}",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -186,8 +172,7 @@
       "backend": [
         {
           "url_pattern": "/v1/invoices/{invoice_id}",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -197,8 +182,7 @@
       "backend": [
         {
           "url_pattern": "/v1/lines/{line_id}/invoices",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     },
@@ -209,8 +193,7 @@
       "backend": [
         {
           "url_pattern": "/metrics",
-          "host": ["http://commerce_service:5002"],
-          "timeout": "5s"
+          "host": ["http://commerce_service:5002"]
         }
       ]
     }
