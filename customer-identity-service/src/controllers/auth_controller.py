@@ -1,3 +1,4 @@
+import bcrypt
 import random
 from datetime import datetime, timedelta
 
@@ -14,15 +15,30 @@ def request_mfa(request):
     """Generate MFA OTP"""
 
     payload = request.get_json() or {}
+
     email = payload.get("email")
+    password = payload.get("password")
 
     if not email:
         return jsonify({"error": "Email is required"}), 400
 
+    if not password:
+        return jsonify({"error": "Password is required"}), 400
+
     user_account = get_user_account_by_email(email)
 
     if not user_account:
-        return jsonify({"error": "User account not found"}), 404
+        return jsonify({
+            "error": "Invalid email or password"
+        }), 401
+
+    if not bcrypt.checkpw(
+        password.encode("utf-8"),
+        user_account["password_hash"].encode("utf-8")
+    ):
+        return jsonify({
+            "error": "Invalid email or password"
+        }), 401
 
     otp_code = str(random.randint(100000, 999999))
 

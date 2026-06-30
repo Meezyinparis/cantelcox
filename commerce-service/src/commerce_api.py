@@ -1,6 +1,3 @@
-
-
-import time
 from flask import Flask, request, jsonify
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -136,14 +133,12 @@ def post_orders():
 @app.get("/v1/orders/<int:order_id>")
 def get_order_id(order_id):
     """Get order by ID"""
-    counter_orders.inc()
     return get_order(order_id)
 
 
 @app.delete("/v1/orders/<int:order_id>")
 def delete_order_id(order_id):
     """Delete order by ID"""
-    counter_orders.inc()
     return remove_order(order_id)
 
 

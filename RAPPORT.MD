@@ -819,6 +819,24 @@ _[À compléter — pyramide de tests (unit → intégration → E2E), scénario
 
 _Couverture mesurée sur le domaine critique : [À compléter] % (cible ≥ 80 %)._
 
+
+La stratégie de tests suit une pyramide simple : tests unitaires, tests d'intégration et tests bout-en-bout. Les tests unitaires avec `pytest` valident les fonctions critiques des services, notamment la création de clients, la demande MFA, la vérification MFA, la consultation des forfaits, l'activation de ligne, la création de commande, la consultation d'usage et la consultation des factures.
+
+Les tests d'intégration sont exécutés dans Docker Compose afin de vérifier les interactions réelles entre les microservices, MySQL, Redis et KrakenD. Les collections Postman servent à valider manuellement les API REST exposées par la Gateway et à démontrer les scénarios métier principaux.
+
+Le scénario E2E principal couvre le parcours suivant : inscription d'un client, demande d'un code MFA, vérification du MFA, activation d'une ligne mobile, souscription à un forfait, consultation de l'usage et consultation des factures. Ce scénario permet de vérifier la cohérence entre le `customer-identity-service`, le `commerce-service` et l'API Gateway.
+
+| Niveau | Outil | Objectif |
+|---|---|---|
+| Tests unitaires | `pytest` | Vérifier les fonctions critiques et les contrôleurs des microservices. |
+| Tests d'intégration | `pytest` + Docker Compose | Valider les interactions avec MySQL, Redis et les appels interservices. |
+| Tests API | Postman | Tester les routes REST via KrakenD et documenter les scénarios métier. |
+| Tests E2E | Postman / pytest | Exécuter le parcours complet inscription → MFA → activation → souscription → usage/factures. |
+| Tests de charge | Locust | Mesurer la latence P95/P99, le débit RPS et le taux d'erreurs. |
+
+Couverture mesurée sur le domaine critique : **à mesurer avec `pytest-cov`**. La cible retenue est **≥ 80 %**.
+
+
 ## 10.5 Résultats des campagnes de charge
 
 Scénarios k6/JMeter/Artillery — stress progressif jusqu’au seuil de saturation :

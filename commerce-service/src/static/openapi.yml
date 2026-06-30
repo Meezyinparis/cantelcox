@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: CanTelcoX Commerce Service API
+  title: API du service commerce CanTelcoX
   version: 1.0.0
 
 servers:
@@ -9,21 +9,21 @@ servers:
 paths:
   /:
     get:
-      summary: Base URL
+      summary: URL de base
       responses:
         '200':
-          description: Service status
+          description: Statut du service
 
   /health:
     get:
-      summary: Health check
+      summary: Vérification de santé
       responses:
         '200':
-          description: Service is healthy
+          description: Le service est sain
 
   /test/slow/{delay_seconds}:
     get:
-      summary: Test slow endpoint
+      summary: Point de terminaison de test lent
       parameters:
         - name: delay_seconds
           in: path
@@ -32,16 +32,16 @@ paths:
             type: integer
       responses:
         '200':
-          description: Delayed response
+          description: Réponse retardée
 
   /v1/catalog/plans:
     get:
-      summary: Get all active plans
+      summary: Obtenir tous les forfaits actifs
       responses:
         '200':
-          description: List of plans
+          description: Liste des forfaits
     post:
-      summary: Create a new plan
+      summary: Créer un nouveau forfait
       requestBody:
         required: true
         content:
@@ -50,31 +50,31 @@ paths:
               $ref: '#/components/schemas/CreatePlanRequest'
       responses:
         '201':
-          description: Plan created
+          description: Forfait créé
 
   /v1/catalog/plans/{plan_id}:
     get:
-      summary: Get plan by ID
+      summary: Obtenir le forfait par ID
       parameters:
         - $ref: '#/components/parameters/PlanId'
       responses:
         '200':
-          description: Plan found
+          description: Forfait trouvé
         '404':
-          description: Plan not found
+          description: Forfait introuvable
     delete:
-      summary: Delete plan by ID
+      summary: Supprimer le forfait par ID
       parameters:
         - $ref: '#/components/parameters/PlanId'
       responses:
         '200':
-          description: Plan deleted
+          description: Forfait supprimé
         '404':
-          description: Plan not found
+          description: Forfait introuvable
 
   /v1/lines/activate:
     post:
-      summary: Activate a mobile line
+      summary: Activer une ligne mobile
       security:
         - bearerAuth: []
       requestBody:
@@ -85,40 +85,40 @@ paths:
               $ref: '#/components/schemas/ActivateLineRequest'
       responses:
         '201':
-          description: Line activated
+          description: Ligne activée
 
   /v1/lines/{line_id}:
     get:
-      summary: Get mobile line by ID
+      summary: Obtenir la ligne mobile par ID
       parameters:
         - $ref: '#/components/parameters/LineId'
       responses:
         '200':
-          description: Line found
+          description: Ligne trouvée
         '404':
-          description: Line not found
+          description: Ligne introuvable
     delete:
-      summary: Delete mobile line
+      summary: Supprimer la ligne mobile
       parameters:
         - $ref: '#/components/parameters/LineId'
       responses:
         '200':
-          description: Line deleted
+          description: Ligne supprimée
         '404':
-          description: Line not found
+          description: Ligne introuvable
 
   /v1/customers/{customer_id}/lines:
     get:
-      summary: Get all lines for a customer
+      summary: Obtenir toutes les lignes pour un client
       parameters:
         - $ref: '#/components/parameters/CustomerId'
       responses:
         '200':
-          description: Customer lines
+          description: Lignes du client
 
   /v1/orders:
     post:
-      summary: Create a new order
+      summary: Créer une nouvelle commande
       security:
         - bearerAuth: []
       parameters:
@@ -136,31 +136,31 @@ paths:
               $ref: '#/components/schemas/CreateOrderRequest'
       responses:
         '201':
-          description: Order created
+          description: Commande créée
 
   /v1/orders/{order_id}:
     get:
-      summary: Get order by ID
+      summary: Obtenir la commande par ID
       parameters:
         - $ref: '#/components/parameters/OrderId'
       responses:
         '200':
-          description: Order found
+          description: Commande trouvée
         '404':
-          description: Order not found
+          description: Commande introuvable
     delete:
-      summary: Delete order
+      summary: Supprimer la commande
       parameters:
         - $ref: '#/components/parameters/OrderId'
       responses:
         '200':
-          description: Order deleted
+          description: Commande supprimée
         '404':
-          description: Order not found
+          description: Commande introuvable
 
   /v1/usage:
     post:
-      summary: Create usage record
+      summary: Créer un enregistrement d'utilisation
       requestBody:
         required: true
         content:
@@ -169,22 +169,22 @@ paths:
               $ref: '#/components/schemas/CreateUsageRequest'
       responses:
         '201':
-          description: Usage created
+          description: Utilisation créée
 
   /v1/usage/{line_id}:
     get:
-      summary: Get usage by line ID
+      summary: Obtenir l'utilisation par ID de ligne
       parameters:
         - $ref: '#/components/parameters/LineId'
       responses:
         '200':
-          description: Usage found
+          description: Utilisation trouvée
         '404':
-          description: Usage not found
+          description: Utilisation introuvable
 
   /v1/invoices:
     post:
-      summary: Create invoice
+      summary: Créer une facture
       requestBody:
         required: true
         content:
@@ -193,43 +193,43 @@ paths:
               $ref: '#/components/schemas/CreateInvoiceRequest'
       responses:
         '201':
-          description: Invoice created
+          description: Facture créée
 
   /v1/invoices/{invoice_id}:
     get:
-      summary: Get invoice by ID
+      summary: Obtenir la facture par ID
       parameters:
         - $ref: '#/components/parameters/InvoiceId'
       responses:
         '200':
-          description: Invoice found
+          description: Facture trouvée
         '404':
-          description: Invoice not found
+          description: Facture introuvable
     delete:
-      summary: Delete invoice
+      summary: Supprimer la facture
       parameters:
         - $ref: '#/components/parameters/InvoiceId'
       responses:
         '200':
-          description: Invoice deleted
+          description: Facture supprimée
         '404':
-          description: Invoice not found
+          description: Facture introuvable
 
   /v1/lines/{line_id}/invoices:
     get:
-      summary: Get invoices for one mobile line
+      summary: Obtenir les factures pour une ligne mobile
       parameters:
         - $ref: '#/components/parameters/LineId'
       responses:
         '200':
-          description: Line invoices
+          description: Factures de la ligne
 
   /metrics:
     get:
-      summary: Prometheus metrics
+      summary: Métriques Prometheus
       responses:
         '200':
-          description: Metrics in Prometheus format
+          description: Métriques au format Prometheus
 
 components:
   securitySchemes:

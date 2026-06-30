@@ -16,8 +16,6 @@ CREATE TABLE IF NOT EXISTS user_accounts (
     customer_id INT NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    mfa_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-    account_locked BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
@@ -50,7 +48,7 @@ VALUES
 ('Alice', 'Tremblay', 'alice@example.com', '+15145550001', TRUE, 'ACTIVE'),
 ('Marc', 'Gagnon', 'marc@example.com', '+15145550002', TRUE, 'ACTIVE');
 
-INSERT INTO user_accounts (customer_id, email, password_hash, mfa_enabled)
+INSERT INTO user_accounts (customer_id, email, password_hash)
 VALUES
-(1, 'alice@example.com', 'hashed_password_demo', TRUE),
-(2, 'marc@example.com', 'hashed_password_demo', TRUE);
+(1, 'alice@example.com', 'hashed_password_demo'),
+(2, 'marc@example.com', 'hashed_password_demo');

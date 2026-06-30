@@ -26,7 +26,7 @@ class Logger:
 
         # File handler (.log file)
         if (log_to_file):
-            fileHandler = logging.FileHandler("canteltox.log")
+            fileHandler = logging.FileHandler("cantelcox.log")
             fileHandler.setFormatter(formatter)
             logger.addHandler(fileHandler)
 

@@ -4,8 +4,6 @@ import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# optimization: on utilise un pool de connections
-# https://redis.io/docs/latest/develop/clients/pools-and-muxing/
 pool = redis.ConnectionPool(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB, decode_responses=True)
 
 def get_mysql_conn():

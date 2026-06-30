@@ -1,21 +1,27 @@
+import bcrypt
 from models.user_account import UserAccount
 from db import get_sqlalchemy_session
 
 
-def add_user_account(customer_id: int, email: str, password_hash: str):
+def add_user_account(customer_id: int, email: str, password: str):
     """Insert user account in MySQL"""
 
-    if not customer_id or not email or not password_hash:
+    if not customer_id or not email or not password:
         raise ValueError("Cannot create user account.")
 
     session = get_sqlalchemy_session()
+
+    hashed_password = bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
 
     try:
 
         account = UserAccount(
             customer_id=customer_id,
             email=email,
-            password_hash=password_hash
+            password_hash=password
         )
 
         session.add(account)

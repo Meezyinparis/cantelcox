@@ -1,32 +1,32 @@
 openapi: 3.0.3
 
 info:
-  title: CanTelcoX - Customer Identity Service API
-  description: API for customer registration, customer lookup, and MFA authentication.
+  title: API du service d'identité client CanTelcoX
+  description: API pour l'enregistrement des clients, la recherche de clients et l'authentification MFA.
   version: 1.0.0
 
 servers:
   - url: http://localhost:5001
-    description: Local development server
+    description: Serveur de développement local
 
 tags:
-  - name: Health
-    description: Health check endpoints
-  - name: Customers
-    description: Customer identity management
-  - name: Authentication
-    description: MFA authentication flow
+  - name: Santé
+    description: Points de terminaison de vérification de santé
+  - name: Clients
+    description: Gestion des identités clients
+  - name: Authentification
+    description: Flux d'authentification MFA
 
 paths:
   /health:
     get:
       tags:
-        - Health
-      summary: Health check
-      description: Returns the health status of the Customer Identity Service.
+        - Santé
+      summary: Vérification de santé
+      description: Renvoie le statut du service d'identité client.
       responses:
         '200':
-          description: Service is healthy
+          description: Service sain
           content:
             application/json:
               schema:
@@ -37,9 +37,9 @@ paths:
   /v1/customers/register:
     post:
       tags:
-        - Customers
-      summary: Register a customer
-      description: Creates a new customer identity profile.
+        - Clients
+      summary: Enregistrer un client
+      description: Crée un nouveau profil d'identité client.
       requestBody:
         required: true
         content:
@@ -53,48 +53,48 @@ paths:
               phone_number: '5145551234'
       responses:
         '201':
-          description: Customer successfully registered
+          description: Client enregistré avec succès
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegisterCustomerResponse'
               example:
                 customer_id: 1
-                message: Customer registered successfully
+                message: Client enregistré avec succès
         '400':
-          description: Invalid request body or missing fields
+          description: Corps de requête invalide ou champs manquants
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Missing required field
+                error: Champ requis manquant
         '409':
-          description: Customer already exists
+          description: Le client existe déjà
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Customer with this email already exists
+                error: Un client avec cet email existe déjà
 
   /v1/customers/{customer_id}:
     get:
       tags:
-        - Customers
-      summary: Get customer by ID
-      description: Returns a customer profile using the customer ID.
+        - Clients
+      summary: Obtenir un client par ID
+      description: Renvoie le profil client en utilisant l'ID client.
       parameters:
         - name: customer_id
           in: path
           required: true
-          description: Customer ID
+          description: ID client
           schema:
             type: integer
             example: 1
       responses:
         '200':
-          description: Customer found
+          description: Client trouvé
           content:
             application/json:
               schema:
@@ -106,20 +106,20 @@ paths:
                 email: john@example.com
                 phone_number: '5145551234'
         '404':
-          description: Customer not found
+          description: Client introuvable
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Customer not found
+                error: Client introuvable
 
   /v1/auth/mfa/request:
     post:
       tags:
-        - Authentication
-      summary: Request MFA OTP
-      description: Generates an MFA OTP for a registered customer email.
+        - Authentification
+      summary: Demander un OTP MFA
+      description: Génère un OTP MFA pour l'email d'un client enregistré.
       requestBody:
         required: true
         content:
@@ -130,37 +130,37 @@ paths:
               email: john@example.com
       responses:
         '200':
-          description: OTP generated successfully
+          description: OTP généré avec succès
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MfaRequestResponse'
               example:
-                message: MFA code generated
+                message: Code MFA généré
                 otp: '123456'
         '400':
-          description: Invalid request body or missing email
+          description: Corps de requête invalide ou email manquant
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Email is required
+                error: Email requis
         '404':
-          description: Customer email not found
+          description: Email client introuvable
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Customer not found
+                error: Client introuvable
 
   /v1/auth/mfa/verify:
     post:
       tags:
-        - Authentication
-      summary: Verify MFA OTP
-      description: Verifies the MFA OTP and returns a JWT token if successful.
+        - Authentification
+      summary: Vérifier OTP MFA
+      description: Vérifie l'OTP MFA et renvoie un jeton JWT si la vérification réussit.
       requestBody:
         required: true
         content:
@@ -172,38 +172,38 @@ paths:
               otp: '123456'
       responses:
         '200':
-          description: MFA verified successfully
+          description: MFA vérifié avec succès
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MfaVerifyResponse'
               example:
-                message: MFA verified
+                message: MFA vérifié
                 token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example
         '400':
-          description: Invalid request body, missing fields, or invalid OTP
+          description: Corps de requête invalide, champs manquants ou OTP invalide
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Invalid OTP
+                error: OTP invalide
         '401':
-          description: MFA verification failed
+          description: Échec de la vérification MFA
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Invalid or expired OTP
+                error: OTP invalide ou expiré
         '404':
-          description: Customer email not found
+          description: Email client introuvable
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: Customer not found
+                error: Client introuvable
 
 components:
   schemas:
@@ -246,7 +246,7 @@ components:
           example: 1
         message:
           type: string
-          example: Customer registered successfully
+          example: Client enregistré avec succès
       required:
         - customer_id
 
@@ -291,7 +291,7 @@ components:
       properties:
         message:
           type: string
-          example: MFA code generated
+          example: Code MFA généré
         otp:
           type: string
           example: '123456'
@@ -317,7 +317,7 @@ components:
       properties:
         message:
           type: string
-          example: MFA verified
+          example: MFA vérifié
         token:
           type: string
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example
@@ -330,6 +330,6 @@ components:
       properties:
         error:
           type: string
-          example: Something went wrong
+          example: Quelque chose s'est mal passé
       required:
         - error

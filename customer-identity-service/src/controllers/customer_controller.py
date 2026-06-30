@@ -21,7 +21,7 @@ def create_customer(request):
     email = payload.get("email")
     phone_number = payload.get("phone_number")
     status = payload.get("status", "active")
-    password_hash = payload.get("password_hash", "hashed_password_demo")
+    password = payload.get("password", "password_demo")
 
     try:
         customer_id = add_customer(
@@ -35,7 +35,7 @@ def create_customer(request):
         add_user_account(
             customer_id,
             email,
-            password_hash
+            password
         )
 
         return jsonify({

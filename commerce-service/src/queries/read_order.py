@@ -8,9 +8,7 @@ def get_order_by_id(order_id):
     session = get_sqlalchemy_session()
 
     try:
-
         order = session.query(Order).filter_by(id=order_id).first()
-
         if not order:
             return {}
 
@@ -19,7 +17,6 @@ def get_order_by_id(order_id):
         ).all()
 
         return {
-
             "id": order.id,
             "customer_id": order.customer_id,
             "line_id": order.line_id,
@@ -27,17 +24,13 @@ def get_order_by_id(order_id):
             "idempotency_key": order.idempotency_key,
 
             "items": [
-
                 {
-
                     "plan_id": item.plan_id,
                     "quantity": item.quantity,
                     "unit_price": float(item.unit_price)
 
                 }
-
                 for item in items
-
             ]
 
         }
