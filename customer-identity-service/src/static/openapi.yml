@@ -1,35 +1,335 @@
 openapi: 3.0.3
+
 info:
-  title: CanTelcoX Commerce Service API
+  title: CanTelcoX - Customer Identity Service API
+  description: API for customer registration, customer lookup, and MFA authentication.
   version: 1.0.0
 
 servers:
-  - url: http://localhost:5002
+  - url: http://localhost:5001
+    description: Local development server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Customers
+    description: Customer identity management
+  - name: Authentication
+    description: MFA authentication flow
 
 paths:
   /health:
     get:
+      tags:
+        - Health
       summary: Health check
+      description: Returns the health status of the Customer Identity Service.
       responses:
-        "200":
-          description: Service healthy
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
 
-  /v1/catalog/plans:
-    get:
-      summary: Get all plans
-      responses:
-        "200":
-          description: List of plans
-
-  /v1/orders:
+  /v1/customers/register:
     post:
-      summary: Create order
-      parameters:
-        - in: header
-          name: Idempotency-Key
-          required: true
-          schema:
-            type: string
+      tags:
+        - Customers
+      summary: Register a customer
+      description: Creates a new customer identity profile.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCustomerRequest'
+            example:
+              first_name: John
+              last_name: Doe
+              email: john@example.com
+              phone_number: '5145551234'
       responses:
-        "201":
-          description: Order created
+        '201':
+          description: Customer successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterCustomerResponse'
+              example:
+                customer_id: 1
+                message: Customer registered successfully
+        '400':
+          description: Invalid request body or missing fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Missing required field
+        '409':
+          description: Customer already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Customer with this email already exists
+
+  /v1/customers/{customer_id}:
+    get:
+      tags:
+        - Customers
+      summary: Get customer by ID
+      description: Returns a customer profile using the customer ID.
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+              example:
+                id: 1
+                first_name: John
+                last_name: Doe
+                email: john@example.com
+                phone_number: '5145551234'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Customer not found
+
+  /v1/auth/mfa/request:
+    post:
+      tags:
+        - Authentication
+      summary: Request MFA OTP
+      description: Generates an MFA OTP for a registered customer email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaRequest'
+            example:
+              email: john@example.com
+      responses:
+        '200':
+          description: OTP generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaRequestResponse'
+              example:
+                message: MFA code generated
+                otp: '123456'
+        '400':
+          description: Invalid request body or missing email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Email is required
+        '404':
+          description: Customer email not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Customer not found
+
+  /v1/auth/mfa/verify:
+    post:
+      tags:
+        - Authentication
+      summary: Verify MFA OTP
+      description: Verifies the MFA OTP and returns a JWT token if successful.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaVerifyRequest'
+            example:
+              email: john@example.com
+              otp: '123456'
+      responses:
+        '200':
+          description: MFA verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaVerifyResponse'
+              example:
+                message: MFA verified
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example
+        '400':
+          description: Invalid request body, missing fields, or invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid OTP
+        '401':
+          description: MFA verification failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Invalid or expired OTP
+        '404':
+          description: Customer email not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Customer not found
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+      required:
+        - status
+
+    RegisterCustomerRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        phone_number:
+          type: string
+          example: '5145551234'
+      required:
+        - first_name
+        - last_name
+        - email
+        - phone_number
+
+    RegisterCustomerResponse:
+      type: object
+      properties:
+        customer_id:
+          type: integer
+          example: 1
+        message:
+          type: string
+          example: Customer registered successfully
+      required:
+        - customer_id
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        phone_number:
+          type: string
+          example: '5145551234'
+      required:
+        - id
+        - first_name
+        - last_name
+        - email
+        - phone_number
+
+    MfaRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+      required:
+        - email
+
+    MfaRequestResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: MFA code generated
+        otp:
+          type: string
+          example: '123456'
+      required:
+        - otp
+
+    MfaVerifyRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        otp:
+          type: string
+          example: '123456'
+      required:
+        - email
+        - otp
+
+    MfaVerifyResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: MFA verified
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example
+      required:
+        - message
+        - token
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Something went wrong
+      required:
+        - error

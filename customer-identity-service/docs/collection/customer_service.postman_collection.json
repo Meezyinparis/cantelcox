@@ -97,35 +97,6 @@
         }
       },
       "response": []
-    },
-    {
-      "name": "/metrics",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseURL}}/metrics",
-          "host": ["{{baseURL}}"],
-          "path": ["metrics"]
-        }
-      },
-      "response": []
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [""]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [""]
-      }
     }
   ],
   "variable": [
