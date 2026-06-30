@@ -38,11 +38,6 @@ def create_order(request):
 
         customer = customer_response.json()
 
-        if not customer.get("identity_verified"):
-            return jsonify({
-                "error": "Customer identity is not verified"
-            }), 403
-
         if customer.get("status") != "ACTIVE":
             return jsonify({
                 "error": "Customer account is not active"

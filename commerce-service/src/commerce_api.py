@@ -9,7 +9,7 @@ from logger import Logger
 from controllers.plan_controller import (
     get_plans,
     get_plan,
-    create_plan,
+    activate_plan,
     remove_plan
 )
 
@@ -54,7 +54,8 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 counter_catalog = Counter("catalog_requests", "Calls to catalog endpoints")
-counter_line_activation = Counter("line_activation_requests", "Calls to line activation")
+counter_line_activation = Counter(
+    "line_activation_requests", "Calls to line activation")
 counter_orders = Counter("orders_requests", "Calls to orders")
 counter_usage = Counter("usage_requests", "Calls to usage endpoints")
 counter_invoices = Counter("invoice_requests", "Calls to invoice endpoints")
@@ -70,6 +71,7 @@ def home():
 def health():
     """Return OK if app is up and running"""
     return jsonify({"status": "healthy"})
+
 
 @app.get("/v1/catalog/plans")
 def get_catalog_plans():
@@ -89,7 +91,7 @@ def get_catalog_plan_id(plan_id):
 def post_catalog_plans():
     """Create a new plan"""
     counter_catalog.inc()
-    return create_plan(request)
+    return activate_plan(request)
 
 
 @app.delete("/v1/catalog/plans/<int:plan_id>")
@@ -97,6 +99,7 @@ def delete_catalog_plan_id(plan_id):
     """Delete a plan"""
     counter_catalog.inc()
     return remove_plan(plan_id)
+
 
 @app.post("/v1/lines/activate")
 def post_activate_line():
@@ -142,6 +145,7 @@ def delete_order_id(order_id):
     """Delete order by ID"""
     counter_orders.inc()
     return remove_order(order_id)
+
 
 @app.post("/v1/usage")
 def post_usage():

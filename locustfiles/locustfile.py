@@ -1,8 +1,3 @@
-"""
-Locust load test - CanTelcoX
-LOG430
-"""
-
 import uuid
 from locust import HttpUser, task, between
 

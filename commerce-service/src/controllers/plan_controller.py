@@ -26,7 +26,7 @@ def get_plan(plan_id):
         return jsonify({"error": str(e)}), 500
 
 
-def create_plan(request):
+def activate_plan(request):
     """Create a new plan"""
     payload = request.get_json() or {}
 

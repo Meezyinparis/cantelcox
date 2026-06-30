@@ -7,6 +7,7 @@ from queries.read_mobile_line import (
     get_mobile_lines_by_customer_id
 )
 
+
 def activate_line(request):
     """Activate mobile line"""
 
@@ -15,6 +16,13 @@ def activate_line(request):
     customer_id = payload.get("customer_id")
     msisdn = payload.get("msisdn")
     sim_number = payload.get("sim_number")
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header:
+        return jsonify({"error": "Missing JWT token"}), 401
+
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Invalid authorization format"}), 401
 
     if not customer_id or not msisdn or not sim_number:
         return jsonify({
@@ -22,25 +30,6 @@ def activate_line(request):
         }), 400
 
     try:
-        customer_response = requests.get(
-            f"http://krakend:8080/v1/customers/{customer_id}",
-            timeout=5
-        )
-
-        if customer_response.status_code == 404:
-            return jsonify({"error": "Customer not found"}), 404
-
-        if customer_response.status_code != 200:
-            return jsonify({"error": "Could not validate customer"}), 502
-
-        customer = customer_response.json()
-
-        if not customer.get("identity_verified"):
-            return jsonify({"error": "Customer identity is not verified"}), 403
-
-        if customer.get("status") != "ACTIVE":
-            return jsonify({"error": "Customer account is not active"}), 403
-
         line_id = activate_mobile_line(
             customer_id,
             msisdn,
