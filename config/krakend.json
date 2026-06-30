@@ -110,7 +110,7 @@
     {
       "endpoint": "/v1/lines/activate",
       "method": "POST",
-      "input_headers": ["Authorization"],
+      "input_headers": ["Authorization", "Content-Type"],
       "output_encoding": "no-op",
       "backend": [
         {
@@ -147,7 +147,7 @@
     {
       "endpoint": "/v1/orders",
       "method": "POST",
-      "input_headers": ["Authorization", "Idempotency-Key"],
+      "input_headers": ["Authorization", "Idempotency-Key", "Content-Type"],
       "output_encoding": "no-op",
       "backend": [
         {
