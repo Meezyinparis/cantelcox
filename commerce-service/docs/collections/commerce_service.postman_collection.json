@@ -1,9 +1,7 @@
 {
   "info": {
-    "_postman_id": "6c5cf0f3-commerce-service",
     "name": "CanTelcoX - Commerce Service",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "6052895"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -52,7 +50,11 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer <jwt>"
+            "value": "Bearer {{jwtToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
           }
         ],
         "body": {
@@ -105,16 +107,20 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer <jwt>"
+            "value": "Bearer {{jwtToken}}"
           },
           {
             "key": "Idempotency-Key",
-            "value": "abc-123"
+            "value": "{{idempotencyKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
           }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"customer_id\": 1,\n    \"line_id\": 1,\n    \"items\": [\n        {\n            \"plan_id\": 2,\n            \"quantity\": 1\n        }\n    ]\n}",
+          "raw": "{\n    \"customer_id\": 1,\n    \"line_id\": 1,\n    \"idempotency_key\": \"{{idempotencyKey}}\",\n    \"items\": [\n        {\n            \"plan_id\": 2,\n            \"quantity\": 1\n        }\n    ]\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -195,26 +201,18 @@
       "response": []
     }
   ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [""]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [""]
-      }
-    }
-  ],
   "variable": [
     {
       "key": "baseURL",
       "value": "http://localhost:5002"
+    },
+    {
+      "key": "jwtToken",
+      "value": "test-token"
+    },
+    {
+      "key": "idempotencyKey",
+      "value": "abc-123"
     }
   ]
 }

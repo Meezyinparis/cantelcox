@@ -1,9 +1,7 @@
 {
   "info": {
-    "_postman_id": "0d6b3b1d-identity-service",
     "name": "CanTelcoX - Customer Identity Service",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "6052895"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {

@@ -7,6 +7,29 @@
   "port": 8080,
   "endpoints": [
     {
+      "endpoint": "/health",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/health",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/identity/health",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/health",
+          "host": ["http://customer_identity_service:5001"],
+          "timeout": "5s"
+        }
+      ]
+    },
+
+    {
       "endpoint": "/v1/customers/register",
       "method": "POST",
       "backend": [
@@ -23,7 +46,8 @@
       "backend": [
         {
           "url_pattern": "/v1/customers/{customer_id}",
-          "host": ["http://customer_identity_service:5001"]
+          "host": ["http://customer_identity_service:5001"],
+          "timeout": "5s"
         }
       ]
     },
@@ -33,7 +57,8 @@
       "backend": [
         {
           "url_pattern": "/v1/auth/mfa/request",
-          "host": ["http://customer_identity_service:5001"]
+          "host": ["http://customer_identity_service:5001"],
+          "timeout": "5s"
         }
       ]
     },
@@ -43,17 +68,20 @@
       "backend": [
         {
           "url_pattern": "/v1/auth/mfa/verify",
-          "host": ["http://customer_identity_service:5001"]
+          "host": ["http://customer_identity_service:5001"],
+          "timeout": "5s"
         }
       ]
     },
+
     {
       "endpoint": "/v1/catalog/plans",
       "method": "GET",
       "backend": [
         {
           "url_pattern": "/v1/catalog/plans",
-          "host": ["http://commerce_service:5002"]
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
         }
       ],
       "extra_config": {
@@ -64,8 +92,21 @@
       }
     },
     {
+      "endpoint": "/v1/catalog/plans/{plan_id}",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/catalog/plans/{plan_id}",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+
+    {
       "endpoint": "/v1/lines/activate",
       "method": "POST",
+      "input_headers": ["Authorization"],
       "backend": [
         {
           "url_pattern": "/v1/lines/activate",
@@ -75,12 +116,37 @@
       ]
     },
     {
+      "endpoint": "/v1/lines/{line_id}",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/lines/{line_id}",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/customers/{customer_id}/lines",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/customers/{customer_id}/lines",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+
+    {
       "endpoint": "/v1/orders",
       "method": "POST",
+      "input_headers": ["Authorization", "Idempotency-Key"],
       "backend": [
         {
           "url_pattern": "/v1/orders",
-          "host": ["http://commerce_service:5002"]
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
         }
       ],
       "extra_config": {
@@ -91,22 +157,60 @@
       }
     },
     {
+      "endpoint": "/v1/orders/{order_id}",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/orders/{order_id}",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+
+    {
       "endpoint": "/v1/usage/{line_id}",
       "method": "GET",
       "backend": [
         {
           "url_pattern": "/v1/usage/{line_id}",
-          "host": ["http://commerce_service:5002"]
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
         }
       ]
     },
+
     {
       "endpoint": "/v1/invoices/{invoice_id}",
       "method": "GET",
       "backend": [
         {
           "url_pattern": "/v1/invoices/{invoice_id}",
-          "host": ["http://commerce_service:5002"]
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/lines/{line_id}/invoices",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/v1/lines/{line_id}/invoices",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
+        }
+      ]
+    },
+
+    {
+      "endpoint": "/metrics",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/metrics",
+          "host": ["http://commerce_service:5002"],
+          "timeout": "5s"
         }
       ]
     }
