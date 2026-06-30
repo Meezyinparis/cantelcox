@@ -26,9 +26,9 @@ def test_health(client):
 def test_catalog_plans(client):
     response = client.get("/v1/catalog/plans")
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.get_json()
+
     plans = response.get_json()
-    print(plans)
     assert isinstance(plans, list)
     assert len(plans) > 0
     assert "id" in plans[0]
@@ -85,7 +85,8 @@ def test_commerce_flow(client):
     assert response.status_code in [201, 500]
 
     response = client.get(f"/v1/usage/{line_id}")
-    assert response.status_code in [200, 404]
+
+    assert response.status_code in [200, 404], response.get_json()
 
     response = client.get(f"/v1/lines/{line_id}/invoices")
     assert response.status_code in [200, 404]
