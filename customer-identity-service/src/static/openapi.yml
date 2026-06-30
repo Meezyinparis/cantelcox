@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: CanTelcoX Commerce Service API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5002
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service healthy
+
+  /v1/catalog/plans:
+    get:
+      summary: Get all plans
+      responses:
+        "200":
+          description: List of plans
+
+  /v1/orders:
+    post:
+      summary: Create order
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Order created

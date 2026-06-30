@@ -3,9 +3,21 @@ from flask import Flask, request, jsonify
 
 from controllers.customer_controller import create_customer, get_customer
 from controllers.auth_controller import request_mfa, verify_mfa
+from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__)
 logger = Logger.get_instance("customer_identity")
+
+SWAGGER_URL = "/swagger"
+API_URL = "/static/openapi.yml"
+
+swagger_ui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={"app_name": "CanTelcoX Customer Identity Service"}
+)
+
+app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 
 @app.route("/")

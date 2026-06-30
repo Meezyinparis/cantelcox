@@ -1,12 +1,10 @@
-"""
-Commerce service application
-SPDX - License - Identifier: LGPL - 3.0 - or -later
-Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2025
-"""
+
 
 import time
 from flask import Flask, request, jsonify
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
+from flask_swagger_ui import get_swaggerui_blueprint
+from logger import Logger
 
 from controllers.plan_controller import (
     get_plans,
@@ -42,6 +40,18 @@ from controllers.invoice_controller import (
 
 
 app = Flask(__name__)
+logger = Logger.get_instance("commerce")
+
+SWAGGER_URL = "/swagger"
+API_URL = "/static/openapi.yml"
+
+swagger_ui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={"app_name": "CanTelcoX Commerce Service"}
+)
+
+app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 counter_catalog = Counter("catalog_requests", "Calls to catalog endpoints")
 counter_line_activation = Counter("line_activation_requests", "Calls to line activation")

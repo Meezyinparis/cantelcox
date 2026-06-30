@@ -1,0 +1,367 @@
+openapi: 3.0.3
+info:
+  title: CanTelcoX Commerce Service API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5002
+
+paths:
+  /:
+    get:
+      summary: Base URL
+      responses:
+        '200':
+          description: Service status
+
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+
+  /test/slow/{delay_seconds}:
+    get:
+      summary: Test slow endpoint
+      parameters:
+        - name: delay_seconds
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Delayed response
+
+  /v1/catalog/plans:
+    get:
+      summary: Get all active plans
+      responses:
+        '200':
+          description: List of plans
+    post:
+      summary: Create a new plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanRequest'
+      responses:
+        '201':
+          description: Plan created
+
+  /v1/catalog/plans/{plan_id}:
+    get:
+      summary: Get plan by ID
+      parameters:
+        - $ref: '#/components/parameters/PlanId'
+      responses:
+        '200':
+          description: Plan found
+        '404':
+          description: Plan not found
+    delete:
+      summary: Delete plan by ID
+      parameters:
+        - $ref: '#/components/parameters/PlanId'
+      responses:
+        '200':
+          description: Plan deleted
+        '404':
+          description: Plan not found
+
+  /v1/lines/activate:
+    post:
+      summary: Activate a mobile line
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateLineRequest'
+      responses:
+        '201':
+          description: Line activated
+
+  /v1/lines/{line_id}:
+    get:
+      summary: Get mobile line by ID
+      parameters:
+        - $ref: '#/components/parameters/LineId'
+      responses:
+        '200':
+          description: Line found
+        '404':
+          description: Line not found
+    delete:
+      summary: Delete mobile line
+      parameters:
+        - $ref: '#/components/parameters/LineId'
+      responses:
+        '200':
+          description: Line deleted
+        '404':
+          description: Line not found
+
+  /v1/customers/{customer_id}/lines:
+    get:
+      summary: Get all lines for a customer
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      responses:
+        '200':
+          description: Customer lines
+
+  /v1/orders:
+    post:
+      summary: Create a new order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+          example: abc-123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created
+
+  /v1/orders/{order_id}:
+    get:
+      summary: Get order by ID
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order found
+        '404':
+          description: Order not found
+    delete:
+      summary: Delete order
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order deleted
+        '404':
+          description: Order not found
+
+  /v1/usage:
+    post:
+      summary: Create usage record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUsageRequest'
+      responses:
+        '201':
+          description: Usage created
+
+  /v1/usage/{line_id}:
+    get:
+      summary: Get usage by line ID
+      parameters:
+        - $ref: '#/components/parameters/LineId'
+      responses:
+        '200':
+          description: Usage found
+        '404':
+          description: Usage not found
+
+  /v1/invoices:
+    post:
+      summary: Create invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequest'
+      responses:
+        '201':
+          description: Invoice created
+
+  /v1/invoices/{invoice_id}:
+    get:
+      summary: Get invoice by ID
+      parameters:
+        - $ref: '#/components/parameters/InvoiceId'
+      responses:
+        '200':
+          description: Invoice found
+        '404':
+          description: Invoice not found
+    delete:
+      summary: Delete invoice
+      parameters:
+        - $ref: '#/components/parameters/InvoiceId'
+      responses:
+        '200':
+          description: Invoice deleted
+        '404':
+          description: Invoice not found
+
+  /v1/lines/{line_id}/invoices:
+    get:
+      summary: Get invoices for one mobile line
+      parameters:
+        - $ref: '#/components/parameters/LineId'
+      responses:
+        '200':
+          description: Line invoices
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PlanId:
+      name: plan_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    LineId:
+      name: line_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    CustomerId:
+      name: customer_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    OrderId:
+      name: order_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    InvoiceId:
+      name: invoice_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  schemas:
+    CreatePlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Basic 20
+        description:
+          type: string
+          example: 20 Go
+        monthly_price:
+          type: number
+          example: 35.00
+        data_limit_gb:
+          type: integer
+          example: 20
+        voice_minutes:
+          type: integer
+          example: 500
+        sms_limit:
+          type: integer
+          example: 500
+
+    ActivateLineRequest:
+      type: object
+      properties:
+        customer_id:
+          type: integer
+          example: 1
+        msisdn:
+          type: string
+          example: '5145550003'
+        sim_number:
+          type: string
+          example: 'SIM000003'
+
+    CreateOrderRequest:
+      type: object
+      properties:
+        customer_id:
+          type: integer
+          example: 1
+        line_id:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              plan_id:
+                type: integer
+                example: 1
+              quantity:
+                type: integer
+                example: 1
+
+    CreateUsageRequest:
+      type: object
+      properties:
+        line_id:
+          type: integer
+          example: 1
+        voice_minutes_used:
+          type: integer
+          example: 120
+        sms_used:
+          type: integer
+          example: 45
+        data_used_gb:
+          type: number
+          example: 8.6
+        usage_period:
+          type: string
+          example: '2026-06'
+
+    CreateInvoiceRequest:
+      type: object
+      properties:
+        customer_id:
+          type: integer
+          example: 1
+        line_id:
+          type: integer
+          example: 1
+        billing_cycle:
+          type: string
+          example: '2026-06'
+        amount:
+          type: number
+          example: 35.00
