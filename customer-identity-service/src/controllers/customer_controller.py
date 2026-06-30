@@ -20,6 +20,7 @@ def create_customer(request):
     last_name = payload.get("last_name")
     email = payload.get("email")
     phone_number = payload.get("phone_number")
+    status = payload.get("status", "active")
     password_hash = payload.get("password_hash", "hashed_password_demo")
 
     try:
@@ -27,7 +28,8 @@ def create_customer(request):
             first_name,
             last_name,
             email,
-            phone_number
+            phone_number,
+            status
         )
 
         add_user_account(

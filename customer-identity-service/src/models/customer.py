@@ -9,4 +9,5 @@ class Customer(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
+    status = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)

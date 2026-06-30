@@ -2,7 +2,7 @@ from models.customer import Customer
 from db import get_sqlalchemy_session
 
 
-def add_customer(first_name: str, last_name: str, email: str, phone_number: str):
+def add_customer(first_name: str, last_name: str, email: str, phone_number: str, status: str = "active") -> int:
     """Insert customer in MySQL"""
 
     if not first_name or not last_name or not email or not phone_number:
@@ -17,7 +17,8 @@ def add_customer(first_name: str, last_name: str, email: str, phone_number: str)
             first_name=first_name,
             last_name=last_name,
             email=email,
-            phone_number=phone_number
+            phone_number=phone_number,
+            status=status
         )
 
         session.add(customer)

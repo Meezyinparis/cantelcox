@@ -10,15 +10,14 @@ def get_customer_by_id(customer_id):
     result = session.query(Customer).filter_by(id=customer_id).all()
 
     if len(result):
-
         customer = result[0]
-
         return {
             "id": customer.id,
             "first_name": customer.first_name,
             "last_name": customer.last_name,
             "email": customer.email,
-            "phone_number": customer.phone_number
+            "phone_number": customer.phone_number,
+            "status": customer.status
         }
 
     return {}

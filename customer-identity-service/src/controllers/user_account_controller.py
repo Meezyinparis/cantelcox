@@ -20,7 +20,6 @@ def create_user_account(request):
     password_hash = payload.get("password_hash")
 
     try:
-
         account_id = add_user_account(
             customer_id,
             email,
@@ -42,7 +41,6 @@ def remove_user_account(account_id):
     """Delete user account"""
 
     try:
-
         deleted = delete_user_account(account_id)
 
         if deleted:
@@ -63,11 +61,8 @@ def remove_user_account(account_id):
 
 def get_user_account(account_id):
     """Get user account"""
-
     try:
-
         account = get_user_account_by_id(account_id)
-
         return jsonify(account), 200
 
     except Exception as e:
