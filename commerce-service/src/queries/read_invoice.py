@@ -12,7 +12,8 @@ def get_invoice_by_id_redis(invoice_id):
 
     for key, value in raw_invoice.items():
         found_key = key.decode("utf-8") if isinstance(key, bytes) else key
-        found_value = value.decode("utf-8") if isinstance(value, bytes) else value
+        found_value = value.decode(
+            "utf-8") if isinstance(value, bytes) else value
         invoice[found_key] = found_value
 
     return invoice
@@ -60,8 +61,10 @@ def get_invoices_by_line_id_redis(line_id):
 
             invoice = {}
             for field, value in raw_invoice.items():
-                found_key = field.decode("utf-8") if isinstance(field, bytes) else field
-                found_value = value.decode("utf-8") if isinstance(value, bytes) else value
+                found_key = field.decode(
+                    "utf-8") if isinstance(field, bytes) else field
+                found_value = value.decode(
+                    "utf-8") if isinstance(value, bytes) else value
                 invoice[found_key] = found_value
 
             if invoice and str(invoice.get("line_id")) == str(line_id):

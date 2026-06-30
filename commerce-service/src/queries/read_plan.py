@@ -10,7 +10,8 @@ def get_plan_by_id_redis(plan_id):
     plan = {}
     for key, value in raw_plan.items():
         found_key = key.decode("utf-8") if isinstance(key, bytes) else key
-        found_value = value.decode("utf-8") if isinstance(value, bytes) else value
+        found_value = value.decode(
+            "utf-8") if isinstance(value, bytes) else value
         plan[found_key] = found_value
 
     return plan
@@ -81,8 +82,10 @@ def get_all_plans_redis():
 
             plan = {}
             for field, value in raw_plan.items():
-                found_key = field.decode("utf-8") if isinstance(field, bytes) else field
-                found_value = value.decode("utf-8") if isinstance(value, bytes) else value
+                found_key = field.decode(
+                    "utf-8") if isinstance(field, bytes) else field
+                found_value = value.decode(
+                    "utf-8") if isinstance(value, bytes) else value
                 plan[found_key] = found_value
 
             if plan and plan.get("active") in ["1", "True", "true", True]:
@@ -116,6 +119,9 @@ def get_plan_by_id(plan_id):
 def get_all_plans():
     """Get all plans from Redis"""
     plans = get_all_plans_redis()
+
+    if isinstance(plans, dict):
+        return get_all_plans_mysql()
 
     if plans:
         return plans
