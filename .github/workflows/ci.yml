@@ -110,11 +110,7 @@ jobs:
           done
 
       - name: Exécuter tests Commerce
-        run: docker compose -f docker_compose.yml exec -T commerce_service pytest -s
-
-      - name: Logs Commerce
-        if: always()
-        run: docker compose -f docker_compose.yml logs commerce_service
+        run: docker compose -f docker_compose.yml exec -T commerce_service pytest
 
       - name: Cleanup
         if: always()

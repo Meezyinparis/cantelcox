@@ -1,6 +1,17 @@
 CREATE DATABASE IF NOT EXISTS commerce_db;
 USE commerce_db;
 
+CREATE TABLE IF NOT EXISTS plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    monthly_price DECIMAL(10,2) NOT NULL,
+    data_limit_gb INT,
+    voice_minutes INT,
+    sms_limit INT,
+    active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
 CREATE TABLE IF NOT EXISTS mobile_lines (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
@@ -11,16 +22,6 @@ CREATE TABLE IF NOT EXISTS mobile_lines (
     activated_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (plan_id) REFERENCES plans(id)
-);
-
-CREATE TABLE IF NOT EXISTS mobile_lines (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT NOT NULL,
-    msisdn VARCHAR(20) NOT NULL UNIQUE,
-    sim_number VARCHAR(50) NOT NULL UNIQUE,
-    line_status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
-    activated_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -39,7 +40,6 @@ CREATE TABLE IF NOT EXISTS order_items (
     plan_id INT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(10,2) NOT NULL,
-
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (plan_id) REFERENCES plans(id)
 );
@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS usage_records (
     data_used_gb DECIMAL(10,2) DEFAULT 0,
     usage_period VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
     FOREIGN KEY (line_id) REFERENCES mobile_lines(id)
 );
 
@@ -64,9 +63,7 @@ CREATE TABLE IF NOT EXISTS invoices (
     amount DECIMAL(10,2) NOT NULL,
     invoice_status VARCHAR(30) NOT NULL DEFAULT 'UNPAID',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
     UNIQUE(customer_id, line_id, billing_cycle),
-
     FOREIGN KEY (line_id) REFERENCES mobile_lines(id)
 );
 
@@ -80,7 +77,6 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     payload JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 
 INSERT INTO plans
 (name, description, monthly_price, data_limit_gb, voice_minutes, sms_limit)
