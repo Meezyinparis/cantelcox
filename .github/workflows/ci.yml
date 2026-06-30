@@ -34,7 +34,6 @@ jobs:
       - name: Démarrer les conteneurs
         run: docker compose -f docker_compose.yml up -d --build
 
-  
       - name: Attendre MySQL Identity
         run: |
           timeout=60
@@ -47,7 +46,7 @@ jobs:
               exit 1
             fi
           done
-      
+
       - name: Exécuter tests Customer Identity
         run: docker compose -f docker_compose.yml exec -T customer_identity_service pytest
 
@@ -110,11 +109,12 @@ jobs:
             fi
           done
 
-      - name: Logs Commerce avant tests
-        run: docker compose -f docker_compose.yml logs commerce_service
-
       - name: Exécuter tests Commerce
         run: docker compose -f docker_compose.yml exec -T commerce_service pytest
+
+      - name: Logs Commerce
+        if: always()
+        run: docker compose -f docker_compose.yml logs commerce_service
 
       - name: Cleanup
         if: always()
