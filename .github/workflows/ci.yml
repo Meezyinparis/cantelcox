@@ -32,12 +32,12 @@ jobs:
           echo "JWT_EXPIRATION_MINUTES=60" >> .env
 
       - name: Démarrer les conteneurs
-        run: docker compose -f docker_compose.yml up -d --build
+        run: docker compose -f docker-compose.yml up -d --build
 
       - name: Attendre MySQL Identity
         run: |
           timeout=60
-          until docker compose -f docker_compose.yml exec -T mysql_identity mysqladmin ping -h localhost -u root -proot --silent; do
+          until docker compose -f docker-compose.yml exec -T mysql_identity mysqladmin ping -h localhost -u root -proot --silent; do
             echo "Waiting for MySQL..."
             sleep 3
             timeout=$((timeout - 3))
@@ -48,11 +48,11 @@ jobs:
           done
 
       - name: Exécuter tests Customer Identity
-        run: docker compose -f docker_compose.yml exec -T customer_identity_service pytest
+        run: docker compose -f docker-compose.yml exec -T customer_identity_service pytest
 
       - name: Cleanup
         if: always()
-        run: docker compose -f docker_compose.yml down -v
+        run: docker compose -f docker-compose.yml down -v
 
   test-commerce:
     runs-on: ubuntu-latest
@@ -81,12 +81,12 @@ jobs:
           echo "JWT_EXPIRATION_MINUTES=60" >> .env
 
       - name: Démarrer les conteneurs
-        run: docker compose -f docker_compose.yml up -d --build
+        run: docker compose -f docker-compose.yml up -d --build
 
       - name: Attendre MySQL Commerce
         run: |
           timeout=60
-          until docker compose -f docker_compose.yml exec -T mysql_commerce mysqladmin ping -h localhost -u root -proot --silent; do
+          until docker compose -f docker-compose.yml exec -T mysql_commerce mysqladmin ping -h localhost -u root -proot --silent; do
             echo "Waiting for MySQL..."
             sleep 3
             timeout=$((timeout - 3))
@@ -99,7 +99,7 @@ jobs:
       - name: Attendre Redis
         run: |
           timeout=60
-          until docker compose -f docker_compose.yml exec -T redis redis-cli ping; do
+          until docker compose -f docker-compose.yml exec -T redis redis-cli ping; do
             echo "Waiting for Redis..."
             sleep 3
             timeout=$((timeout - 3))
@@ -110,8 +110,8 @@ jobs:
           done
 
       - name: Exécuter tests Commerce
-        run: docker compose -f docker_compose.yml exec -T commerce_service pytest
+        run: docker compose -f docker-compose.yml exec -T commerce_service pytest
 
       - name: Cleanup
         if: always()
-        run: docker compose -f docker_compose.yml down -v
+        run: docker compose -f docker-compose.yml down -v
