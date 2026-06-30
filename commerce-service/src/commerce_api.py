@@ -71,13 +71,6 @@ def health():
     """Return OK if app is up and running"""
     return jsonify({"status": "healthy"})
 
-
-@app.get("/test/slow/<int:delay_seconds>")
-def test_slow_endpoint(delay_seconds):
-    """Endpoint pour tester les timeouts"""
-    time.sleep(delay_seconds)
-    return jsonify({"message": f"Response after {delay_seconds} seconds"}), 200
-
 @app.get("/v1/catalog/plans")
 def get_catalog_plans():
     """Get all active plans"""
