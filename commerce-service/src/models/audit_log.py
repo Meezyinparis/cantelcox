@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, JSON, TIMESTAMP, text
 
-from models.db import Base
+from models.base import Base
 
 
 class AuditLog(Base):

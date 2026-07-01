@@ -21,7 +21,7 @@ def add_user_account(customer_id: int, email: str, password: str):
         account = UserAccount(
             customer_id=customer_id,
             email=email,
-            password_hash=password
+            password_hash=hashed_password
         )
 
         session.add(account)
