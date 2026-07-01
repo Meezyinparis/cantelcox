@@ -1,12 +1,14 @@
 import json
 import uuid
+
 import pytest
 import requests
+
 from commerce_api import app
 
 
 class MockAuthResponse:
-    def __init__(self, status_code):
+    def __init__(self, status_code=200):
         self.status_code = status_code
 
     def json(self):
@@ -19,20 +21,21 @@ class MockAuthResponse:
 
 
 @pytest.fixture
-def mock_valid_jwt(monkeypatch):
-    def fake_post(url, headers=None, timeout=3, **kwargs):
-        if "/v1/auth/validate" in url:
-            return MockAuthResponse(200)
-        return MockAuthResponse(404)
-
-    monkeypatch.setattr(requests, "post", fake_post)
-
-
-@pytest.fixture
 def client():
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
+
+
+@pytest.fixture
+def mock_valid_jwt(monkeypatch):
+    def fake_post(url, headers=None, timeout=3, **kwargs):
+        if "/v1/auth/validate" in url:
+            return MockAuthResponse(200)
+
+        return MockAuthResponse(404)
+
+    monkeypatch.setattr(requests, "post", fake_post)
 
 
 def auth_headers(extra=None):
@@ -40,22 +43,27 @@ def auth_headers(extra=None):
         "Authorization": "Bearer test-token",
         "Content-Type": "application/json"
     }
+
     if extra:
         headers.update(extra)
+
     return headers
 
 
 def test_health(client):
     response = client.get("/health")
+
     assert response.status_code == 200
     assert response.get_json() == {"status": "healthy"}
 
 
 def test_catalog_plans(client):
     response = client.get("/v1/catalog/plans")
+
     assert response.status_code == 200
 
     plans = response.get_json()
+
     assert isinstance(plans, list)
     assert len(plans) > 0
     assert "id" in plans[0]
@@ -100,6 +108,31 @@ def test_activate_line_missing_token(client):
     assert response.status_code == 401
 
 
+def test_activate_line_invalid_token(client, monkeypatch):
+    def fake_post(url, headers=None, timeout=3, **kwargs):
+        if "/v1/auth/validate" in url:
+            return MockAuthResponse(401)
+
+        return MockAuthResponse(404)
+
+    monkeypatch.setattr(requests, "post", fake_post)
+
+    line_data = {
+        "customer_id": 1,
+        "msisdn": f"514{str(uuid.uuid4().int)[:7]}",
+        "sim_number": f"SIM-{uuid.uuid4()}"
+    }
+
+    response = client.post(
+        "/v1/lines/activate",
+        data=json.dumps(line_data),
+        content_type="application/json",
+        headers=auth_headers()
+    )
+
+    assert response.status_code == 401
+
+
 def test_activate_line_missing_fields(client, mock_valid_jwt):
     line_data = {
         "customer_id": 1,
@@ -117,10 +150,12 @@ def test_activate_line_missing_fields(client, mock_valid_jwt):
 
 
 def test_create_order_success_or_db_error(client, mock_valid_jwt):
+    idempotency_key = f"test-{uuid.uuid4()}"
+
     order_data = {
         "customer_id": 1,
         "line_id": 1,
-        "idempotency_key": f"test-{uuid.uuid4()}",
+        "idempotency_key": idempotency_key,
         "items": [
             {
                 "plan_id": 1,
@@ -134,7 +169,7 @@ def test_create_order_success_or_db_error(client, mock_valid_jwt):
         data=json.dumps(order_data),
         content_type="application/json",
         headers=auth_headers({
-            "Idempotency-Key": order_data["idempotency_key"]
+            "Idempotency-Key": idempotency_key
         })
     )
 
@@ -168,6 +203,37 @@ def test_create_order_missing_token(client):
     assert response.status_code in [401, 400]
 
 
+def test_create_order_invalid_token(client, monkeypatch):
+    def fake_post(url, headers=None, timeout=3, **kwargs):
+        if "/v1/auth/validate" in url:
+            return MockAuthResponse(401)
+
+        return MockAuthResponse(404)
+
+    monkeypatch.setattr(requests, "post", fake_post)
+
+    order_data = {
+        "customer_id": 1,
+        "line_id": 1,
+        "idempotency_key": f"test-{uuid.uuid4()}",
+        "items": [
+            {
+                "plan_id": 1,
+                "quantity": 1
+            }
+        ]
+    }
+
+    response = client.post(
+        "/v1/orders",
+        data=json.dumps(order_data),
+        content_type="application/json",
+        headers=auth_headers()
+    )
+
+    assert response.status_code in [401, 400]
+
+
 def test_create_order_missing_fields(client, mock_valid_jwt):
     order_data = {
         "customer_id": 1,
@@ -192,6 +258,7 @@ def test_create_order_missing_fields(client, mock_valid_jwt):
 
 def test_usage(client):
     response = client.get("/v1/usage/1")
+
     assert response.status_code in [200, 404]
 
 
@@ -220,11 +287,13 @@ def test_create_usage_success_or_db_error(client):
 
 def test_invoices(client):
     response = client.get("/v1/lines/1/invoices")
+
     assert response.status_code in [200, 404]
 
 
 def test_invoice_by_id(client):
     response = client.get("/v1/invoices/1")
+
     assert response.status_code in [200, 404]
 
 
@@ -252,19 +321,23 @@ def test_create_invoice_success_or_conflict_or_db_error(client):
 
 def test_order_by_id(client):
     response = client.get("/v1/orders/1")
+
     assert response.status_code in [200, 404]
 
 
 def test_line_by_id(client):
     response = client.get("/v1/lines/1")
+
     assert response.status_code in [200, 404]
 
 
 def test_customer_lines(client):
     response = client.get("/v1/customers/1/lines")
+
     assert response.status_code in [200, 404]
 
 
 def test_metrics(client):
     response = client.get("/metrics")
+
     assert response.status_code == 200

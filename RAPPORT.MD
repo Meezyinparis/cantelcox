@@ -6,6 +6,7 @@ Architecture logicielle — Été 2026
 
 **(microservices)**
 
+
 Dossier d’architecture — gabarit Arc42 + vues 4+1 + ADR
 
 _Projet CanTelcoX — Système de support commercial (BSS) télécom_
@@ -280,7 +281,7 @@ Cochez (✓) le ou les domaines couverts par chaque UC, pour démontrer l’alig
 | **Champ**                              | **Contenu**                                                                                                                                                                                              |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **UC retenu**                          | UC-01 — Inscription & vérification d'identité                                                                                                                                                            |
-| **Acteurs**                            | Abonné (principal), Service d'identité                                                                                                                                                                   |
+| **Acteurs**                            | Abonné                                                                                                                                                                  |
 | **Préconditions**                      | L'utilisateur ne possède pas encore de compte.                                                                                                                                                           |
 | **Scénario principal**                 | 1. L'utilisateur remplit le formulaire d'inscription.<br>2. Le système valide les informations.<br>3. Un code OTP est envoyé.<br>4. L'utilisateur saisit le code.<br>5. Le système crée un profil actif. |
 | **Scénarios alternatifs / exceptions** | Courriel déjà utilisé, informations invalides, OTP invalide ou expiré.                                                                                                                                   |
@@ -291,7 +292,7 @@ Cochez (✓) le ou les domaines couverts par chaque UC, pour démontrer l’alig
 | **Champ**                              | **Contenu**                                                                                                                                                                                                         |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **UC retenu**                          | UC-02 — Authentification & MFA                                                                                                                                                                                      |
-| **Acteurs**                            | Abonné (principal), Service d'identité                                                                                                                                                                              |
+| **Acteurs**                            | Abonné                                                                                                                                                                     |
 | **Préconditions**                      | Le compte est actif.                                                                                                                                                                                                |
 | **Scénario principal**                 | 1. L'utilisateur saisit son courriel et son mot de passe.<br>2. Le système valide les identifiants.<br>3. Un code MFA est demandé.<br>4. L'utilisateur valide le code.<br>5. Le système crée une session sécurisée. |
 | **Scénarios alternatifs / exceptions** | Identifiants invalides, code MFA invalide ou expiré, compte verrouillé.                                                                                                                                             |
@@ -302,7 +303,7 @@ Cochez (✓) le ou les domaines couverts par chaque UC, pour démontrer l’alig
 | **Champ**                              | **Contenu**                                                                                                                                                                                             |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **UC retenu**                          | UC-03 — Activation d'une ligne mobile                                                                                                                                                                   |
-| **Acteurs**                            | Abonné (principal), Service Commerce                                                                                                                                                                    |
+| **Acteurs**                            | Abonné                                                                                                                                                                   |
 | **Préconditions**                      | Le client est authentifié et possède un compte actif.                                                                                                                                                   |
 | **Scénario principal**                 | 1. L'utilisateur choisit un forfait.<br>2. Il demande un nouveau numéro ou une portabilité.<br>3. Le système attribue un numéro mobile.<br>4. La ligne est activée.<br>5. Une confirmation est envoyée. |
 | **Scénarios alternatifs / exceptions** | Forfait indisponible, numéro invalide, échec d'activation.                                                                                                                                              |
@@ -313,7 +314,7 @@ Cochez (✓) le ou les domaines couverts par chaque UC, pour démontrer l’alig
 | **Champ**                              | **Contenu**                                                                                                                       |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | **UC retenu**                          | UC-04 — Consultation de l'usage et des factures                                                                                   |
-| **Acteurs**                            | Abonné (principal)                                                                                                                |
+| **Acteurs**                            | Abonné                                                                                                              |
 | **Préconditions**                      | L'utilisateur est authentifié et possède une ligne active.                                                                        |
 | **Scénario principal**                 | 1. L'utilisateur sélectionne une ligne.<br>2. Le système récupère l'usage courant.<br>3. Les factures disponibles sont affichées. |
 | **Scénarios alternatifs / exceptions** | Ligne inexistante, aucune facture disponible.                                                                                     |
@@ -324,10 +325,10 @@ Cochez (✓) le ou les domaines couverts par chaque UC, pour démontrer l’alig
 | **Champ**                              | **Contenu**                                                                                                                                                                                              |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **UC retenu**                          | UC-05 — Prise de commande d'un forfait ou d'une option                                                                                                                                                   |
-| **Acteurs**                            | Abonné (principal), Service Commerce                                                                                                                                                                     |
+| **Acteurs**                            | AbonnéCommerce                                                                                                                                                                     |
 | **Préconditions**                      | L'utilisateur est authentifié et possède une ligne active.                                                                                                                                               |
 | **Scénario principal**                 | 1. L'utilisateur sélectionne un forfait ou une option.<br>2. Le système valide l'éligibilité.<br>3. La commande est enregistrée.<br>4. Les services sont mis à jour.<br>5. Une confirmation est envoyée. |
-| **Scénarios alternatifs / exceptions** | Forfait non admissible, option incompatible, commande déjà traitée (idempotence).                                                                                                                        |
+| **Scénarios alternatifs / exceptions** | Forfait non admissible, option incompatible, commande déjà traitée.                                                                                                                      |
 | **Postconditions / règles métier**     | La commande est enregistrée une seule fois, les services sont mis à jour et l'opération est journalisée.                                                                                                 |
 
 ## 1.3 Objectifs de qualité
@@ -359,7 +360,7 @@ Les trois objectifs de qualité prioritaires (cibles NFR du cahier) :
 | **Contrainte**          | **Description / impact**                                                                              |
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
 | Déploiement             | Machine virtuelle fournie ; conteneurisation Docker ; `docker compose up` unique.                     |
-| Communication (Phase 1) | Synchrone REST entre services.                                                                        |
+| Communication  | Synchrone REST entre services.                                                                        |
 | Documentation           | OpenAPI/Swagger ; modèle Arc42 ; vues 4+1 ; ≥ 3 ADR.                                                  |
 | Observabilité           | Prometheus + Grafana (4 Golden Signals).                                                              |
 | Pile technologique      | Python, Flask, MySQL, Redis (Commerce Service), KrakenD, Docker Compose, Prometheus, Grafana, Locust. |
@@ -373,7 +374,7 @@ Le cadre télécom canadien impose des contraintes structurantes (à tracer vers
 | CRTC / Loi sur les télécommunications | Auditabilité des opérations sensibles.                                                        |
 | Loi 25 / LPRPDE                       | Protection des renseignements personnels, traçabilité des accès.                              |
 | Intégrité transactionnelle            | Idempotence (commandes/activations), exactly-once (facturation), journal d’audit append-only. |
-| Lutte à la fraude                     | Contrôles SIM swap, usurpation d’identité, fraude roaming ; MFA sur opérations sensibles.     |
+| Lutte à la fraude                     | Contrôles SIM swap, usurpation d’identité, fraude roaming. MFA sur opérations sensibles.     |
 
 ## 2.3 Contraintes organisationnelles & conventions
 
@@ -383,7 +384,6 @@ Le cadre télécom canadien impose des contraintes structurantes (à tracer vers
 - Les API sont documentées avec Swagger/OpenAPI et testées avec Postman.
 - L'ensemble du projet est conteneurisé avec Docker Compose.
 
-**Note SIAG (encadrement labos) :** l’usage des systèmes d’IA générative est encadré — assistance au setup, au débogage et à la complétion permise, mais la production directe des livrables évalués peut faire l’objet d’une vérification orale ou écrite. Documentez votre usage.
 
 # 3. Contexte et périmètre
 
@@ -425,10 +425,10 @@ Bounded contexts du domaine télécom (frontières de service candidates) :
 
 | **Bounded context**          | **Responsabilité**                                            | **Service candidat**        |
 | ---------------------------- | ------------------------------------------------------------- | --------------------------- |
-| Clients & Identité           | Profils abonnés, vérification d’identité, MFA                 | `customer-identity-service` |
-| Lignes & Services            | Lignes mobiles, MSISDN, SIM/eSIM, activation                  | `commerce-service`          |
+| Clients & Identité           | Profils abonnés,  MFA                 | `customer-identity-service` |
+| Lignes & Services            | Lignes mobiles, MSISDN, Sactivation                  | `commerce-service`          |
 | Commandes & Activations      | Prise de commande, souscription, activation, idempotence      | `commerce-service`          |
-| Catalogue & Offres           | Forfaits, options, promotions, éligibilité                    | `commerce-service`          |
+| Catalogue & Offres           | Forfaits                   | `commerce-service`          |
 | Usage / Rating / Facturation | Consultation d’usage, génération et consultation des factures | `commerce-service`          |
 | Conformité & Audit           | Journal append-only, traçabilité et audit                     | `commerce-service`          |
 
@@ -436,7 +436,7 @@ Bounded contexts du domaine télécom (frontières de service candidates) :
 
 ![DDD](docs/views/ddd-context-map.png)
 
-La carte des contextes montre que Customer Identity donne l'authentification (MFA/JWT) au contexte Commerce, qui gère les forfaits, les lignes, les commandes, l'usage et la facturation. Les événements importants sont journalisés afin d'assurer la traçabilité.
+La carte des contextes montre que Customer Identity donne l'authentification au contexte Commerce, qui gère les forfaits, les lignes, les commandes, l'usage et la facturation. Les événements importants sont journalisés pour avoir de la traçabilité.
 
 Les principaux concepts DDD sont matérialisés par un Ubiquitous Language commun entre le code et la documentation, des Aggregates garantissant la cohérence transactionnelle (commit/rollback), et des Repositories/DAO encapsulant l'accès aux données.
 
@@ -469,8 +469,8 @@ Les principaux concepts DDD sont matérialisés par un Ubiquitous Language commu
 | **Décision**             | **Choix retenu**                                                                 | **Justification (→ ADR)**                                                                                                                                                                  |
 | ------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Style global             | Architecture basée par services (microservices)                                  | Permet de séparer les responsabilités métier, de déployer les services indépendamment et de respecter les exigences de modularité, d'observabilité et d'évolutivité. → ADR-001             |
-| Découpage (BC → service) | `customer-identity-service` (Customer Identity) et `commerce-service` (Commerce) | Découpage aligné sur les deux bounded contexts retenus pour la Phase 1. Le contexte Commerce regroupe les fonctionnalités de catalogue, commandes, lignes, usage et facturation. → ADR-001 |
-| Style par service        | Architecture hexagonale légère avec MVC pour l'API REST                          | Sépare les contrôleurs, la logique métier, les repositories et les adaptateurs externes afin d'améliorer la maintenabilité et les tests. → ADR-001                                         |
+| Découpage (BC → service) |  Customer Identity et Commerce |  Le contexte Commerce regroupe les fonctionnalités de catalogue, commandes, lignes, usage et facturation. → ADR-001 |
+| Style par service        | Architecture hexagonale légère avec MVC pour l'API REST                          | Sépare les contrôleurs, la logique métier, les repositories et les adaptateurs externes pour une meilleure maintenabilité et des meilleurs tests. → ADR-001                                         |
 
 ## 4.2 Communication inter-services
 
