@@ -22,12 +22,21 @@ def activate_line(request):
     if not auth_header:
         return jsonify({"error": "Missing JWT token"}), 401
 
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Invalid authorization format"}), 401
+
+    if not customer_id or not msisdn or not sim_number:
+        return jsonify({
+            "error": "customer_id, msisdn and sim_number are required"
+        }), 400
+
     response = requests.post(
         "http://krakend:8080/v1/auth/validate",
-        headers={
-            "Authorization": auth_header
-        },
+        headers={"Authorization": auth_header},
     )
+
+    if response.status_code != 200:
+        return jsonify({"error": "Invalid JWT"}), 401
 
     if response.status_code != 200:
         add_audit_log(

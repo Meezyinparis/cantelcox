@@ -474,7 +474,7 @@ Les principaux concepts DDD sont matérialisés par un Ubiquitous Language commu
 
 ## 4.2 Communication inter-services
 
-En Phase 1, les services communiquent entre eux via des API REST en passant par l'API Gateway KrakenD. Chaque service est responsable de son propre domaine et possède sa propre base de données MySQL. Les opérations nécessitant une authentification utilisent un JWT émis par le customer-identity-service après validation du MFA, tandis que le commerce-service valide ce jeton avant d'exécuter les opérations sensibles.
+Les services communiquent entre eux via des API REST en passant par l'API Gateway KrakenD. Chaque service est responsable de son propre domaine et possède sa propre base de données MySQL. Les opérations qui ont besoin d'une authentification appelle le jwt qui est envoyé par Identity Service. Le commerce-service valide ce jeton pour pouvoir exécuter le reste de l'opération.
 
 ## 4.3 Stratégie de l’API REST
 
@@ -522,7 +522,7 @@ Les TMF Open APIs peuvent inspirer la conception. Mapping indicatif :
 
 ![Whitebox](docs/views/whitebox.png)
 
-Le système CanTelcoX est exposé par KrakenD, qui sert de point d’entrée unique. Le `customer-identity-service` gère les profils abonnés, l’authentification et le MFA. Le `commerce-service` gère les lignes mobiles, le catalogue, les commandes et la consultation d’usage. Chaque service possède sa propre base MySQL, et Redis est utilisé uniquement par le service Commerce pour le cache.
+Le système CanTelcoX est exposé par KrakenD qui est le point d’entrée. Le customer-identity-service gère les profils abonnés, l’authentification et le MFA. Le commerce-service gère les lignes mobiles, le catalogue, les commandes et la consultation d’usage. Chaque service possède sa propre base MySQL, et Redis est utilisé uniquement par le service Commerce pour le cache.
 
 ## 5.2 Niveau 2 — Structure interne d’un service (hexagonal)
 
@@ -753,7 +753,7 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 | **Statut** | Accepté |
 | **Contexte** | Les microservices doivent exposer une API cohérente et facile à maintenir tout en simplifiant le débogage. |
 | **Décision** | Toutes les API sont versionnées avec le préfixe `/v1` et utilisent des réponses JSON avec les codes HTTP appropriés (`400`, `401`, `403`, `404`, `409`, `500`). |
-| **Conséquences** | **Positives :** cohérence entre les services, évolution de l'API sans casser les clients existants, débogage facilité. **Négatives :** nécessité de maintenir les versions d'API lors des évolutions futures. |
+| **Conséquences** | **Positives :** cohérence entre les services sans casser les clients existants. **Négatives :** nécessité de maintenir les versions d'API dans des futurs mises à jour. |
 | **Exigence du cahier tracée** | Architecture & API REST, stratégie d'erreurs, versionnement, Swagger/OpenAPI (sections 2 et 8). |                                                                                                       |
 
 # 10. Exigences de qualité
@@ -785,7 +785,7 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 | 1        | Performance    | Garder les API rapides sous charge nominale                | UC-04 et UC-05 doivent rester sous une latence P95 ≤ 500 ms.                                                       |
 | 2        | Disponibilité  | Continuer à servir les requêtes malgré une panne partielle | Si une instance du commerce-service tombe, les autres instances doivent continuer à répondre via le load balancer. |
 | 3        | Sécurité       | Protéger les opérations sensibles                          | Les opérations comme l’activation de ligne et le MFA exigent un JWT/MFA valide.                                    |
-| 4        | Auditabilité   | Garder une trace des opérations importantes                | Les activations, commandes et factures sont journalisées dans un audit log append-only.                            |
+| 4        | Auditabilité   | Garder une trace des opérations importantes                | Les activations, commandes et factures sont journalisées dans un audit log.                       |
 | 5        | Maintenabilité | Faciliter l’évolution du système                           | Les services sont séparés par domaine, versionnés en `/v1`, documentés avec Swagger/OpenAPI et testés en CI.       |
 
 ## 10.2 Scénarios de qualité
@@ -796,7 +796,7 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 | Capacité      | Montée en charge                               | ≥ 600 ops/s avant saturation                   |
 | Disponibilité | Kill d’une instance en charge                  | Maintien de 95 % de disponibilité              |
 | Sécurité      | Opération sensible sans MFA                    | Refus + journalisation                         |
-| Auditabilité  | Création d’une commande, activation ou facture | Événement écrit dans `audit_logs` avec traceId |
+| Auditabilité  | Création d’une commande, activation ou facture | Événement écrit dans audit_logs avec traceId |
 
 ## 10.3 Cibles NFR & résultats
 
@@ -810,11 +810,11 @@ Synthèse ; le détail des mesures et les captures figurent aux §10.5 à §10.8
 
 ## 10.4 Stratégie de tests & couverture
 
-La stratégie de tests suit une pyramide simple : tests unitaires et tests d'intégration. Les tests unitaires avec `pytest`.
+La stratégie de tests suit une pyramide simple : tests unitaires et tests d'intégration. Les tests unitaires avec pytest.
 
 Les tests d'intégration sont exécutés dans Docker Compose afin de vérifier les interactions réelles entre les microservices, MySQL, Redis et KrakenD. Les collections Postman servent à valider manuellement les API REST exposées par la Gateway.
 
-Le scénario E2E principal couvre le parcours suivant : inscription d'un client, demande d'un code MFA, vérification du MFA, activation d'une ligne mobile, souscription à un forfait, consultation de l'usage et consultation des factures. Ce scénario permet de vérifier la cohérence entre le `customer-identity-service`, le `commerce-service` et l'API Gateway.
+Le scénario E2E principal couvre le parcours suivant : inscription d'un client, demande d'un code MFA, vérification du MFA, activation d'une ligne mobile, souscription à un forfait, consultation de l'usage et consultation des factures. Ce scénario permet de vérifier la cohérence entre le customer-identity-service, le commerce-service et l'API Gateway.
 
 | Niveau              | Outil                     | Objectif                                                                                     |
 | ------------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
