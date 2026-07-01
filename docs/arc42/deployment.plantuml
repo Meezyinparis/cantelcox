@@ -1,34 +1,33 @@
 @startuml
 title Vue de déploiement — CanTelcoX
 
+node "Docker - Réseau cantelcox-network" {
 
-  node "Réseau public" {
-    component "KrakenD\nAPI Gateway\n:8080\n/health" as Gateway
+  node "Entrée & observabilité" {
+    component "KrakenD\nAPI Gateway\n:8080" as Gateway
     component "Prometheus\n:9090" as Prometheus
     component "Grafana\n:3000" as Grafana
     component "Locust\n:8089" as Locust
   }
 
-  node "Réseau applicatif interne" {
-    component "customer_identity_api.py\nCustomer Identity Service\n:5001\n/health" as CustomerService
-    component "commerce_api.py\nCommerce Service\n:5002\n/health" as CommerceService
-    database "Redis\n:6379\nredis-cli ping" as Redis
+  node "Services applicatifs" {
+    component "Customer Identity Service\ncustomer_identity_api.py\n:5001\n/health" as CustomerService
+    component "Commerce Service\ncommerce_api.py\n:5002\n/health" as CommerceService
   }
 
-  node "Réseau données interne" {
-    database "MySQL 1\nidentity_db\nvolume: mysql1_data\nhealthcheck: mysqladmin ping" as MySQL1
-    database "MySQL 2\ncommerce_db\nvolume: mysql2_data\nhealthcheck: mysqladmin ping" as MySQL2
+  node "Données" {
+    database "MySQL Identity\nidentity_db\nvolume: mysql_identity_data" as MySQL1
+    database "MySQL Commerce\ncommerce_db\nvolume: mysql_commerce_data" as MySQL2
+    database "Redis\n:6379" as Redis
   }
-
-
-
+}
 
 Gateway --> CustomerService : /v1/customers/*\n/v1/auth/*
-Gateway --> CommerceService : /v1/catalog/*\n/v1/orders/*\n/v1/lines/*\n/v1/usage/*
+Gateway --> CommerceService : /v1/catalog/*\n/v1/orders/*\n/v1/lines/*\n/v1/usage/*\n/v1/invoices/*
 
 CustomerService --> MySQL1 : SQL
 CommerceService --> MySQL2 : SQL
-CommerceService --> Redis : cache catalogue / usage
+CommerceService --> Redis : cache catalogue / usage / factures
 
 Prometheus --> CustomerService : scrape /metrics
 Prometheus --> CommerceService : scrape /metrics

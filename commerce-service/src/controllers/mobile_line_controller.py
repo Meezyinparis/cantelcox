@@ -6,6 +6,7 @@ from queries.read_mobile_line import (
     get_mobile_line_by_id,
     get_mobile_lines_by_customer_id
 )
+from commands.write_audit_log import add_audit_log
 
 
 def activate_line(request):
@@ -21,7 +22,39 @@ def activate_line(request):
     if not auth_header:
         return jsonify({"error": "Missing JWT token"}), 401
 
+    response = requests.post(
+        "http://krakend:8080/v1/auth/validate",
+        headers={
+            "Authorization": auth_header
+        },
+    )
+
+    if response.status_code != 200:
+        add_audit_log(
+            event_type="LINE_ACTIVATION_FAILED",
+            entity_type="MobileLine",
+            payload={
+                "customer_id": customer_id,
+                "msisdn": msisdn,
+                "sim_number": sim_number,
+                "error": "Invalid JWT"
+            }
+        )
+        return jsonify({
+            "error": "Invalid JWT"
+        }), 401
+
     if not auth_header.startswith("Bearer "):
+        add_audit_log(
+            event_type="LINE_ACTIVATION_FAILED",
+            entity_type="MobileLine",
+            payload={
+                "customer_id": customer_id,
+                "msisdn": msisdn,
+                "sim_number": sim_number,
+                "error": "Invalid authorization format"
+            }
+        )
         return jsonify({"error": "Invalid authorization format"}), 401
 
     if not customer_id or not msisdn or not sim_number:
@@ -34,6 +67,12 @@ def activate_line(request):
             customer_id,
             msisdn,
             sim_number
+        )
+
+        add_audit_log(
+            event_type="LINE_ACTIVATED",
+            entity_type="MobileLine",
+            entity_id=line_id
         )
 
         return jsonify({"line_id": line_id}), 201

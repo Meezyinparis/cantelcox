@@ -18,6 +18,18 @@
       ]
     },
     {
+      "endpoint": "v1/auth/validate",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "backend": [
+        {
+          "url_pattern": "/v1/auth/validate",
+          "host": ["http://customer_identity_service:5001"],
+          "encoding": "no-op"
+        }
+      ]
+    },
+    {
       "endpoint": "/v1/identity/health",
       "method": "GET",
       "output_encoding": "no-op",

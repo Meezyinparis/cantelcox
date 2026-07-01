@@ -204,7 +204,7 @@
   "variable": [
     {
       "key": "baseURL",
-      "value": "http://localhost:5002"
+      "value": "http://api-gateway:8080"
     },
     {
       "key": "jwtToken",

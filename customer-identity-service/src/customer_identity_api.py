@@ -2,7 +2,7 @@ from logger import Logger
 from flask import Flask, request, jsonify
 
 from controllers.customer_controller import create_customer, get_customer
-from controllers.auth_controller import request_mfa, verify_mfa
+from controllers.auth_controller import request_mfa, verify_mfa, validate_jwt
 from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__)
@@ -58,6 +58,13 @@ def post_verify_mfa():
     """Verify an MFA/OTP code"""
     logger.debug("Endpoint: POST /v1/auth/mfa/verify")
     return verify_mfa(request)
+
+
+@app.post("/v1/auth/validate")
+def post_validate_jwt():
+    """Validate a JWT token"""
+    logger.debug("Endpoint: POST /v1/auth/validate")
+    return validate_jwt(request)
 
 
 @app.errorhandler(404)

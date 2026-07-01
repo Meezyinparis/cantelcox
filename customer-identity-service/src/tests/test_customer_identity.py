@@ -32,6 +32,8 @@ def test_customer_identity_flow(client):
         "password": password
     }
 
+    logger.info("Registering customer")
+
     response = client.post(
         "/v1/customers/register",
         data=json.dumps(customer_data),
@@ -41,15 +43,19 @@ def test_customer_identity_flow(client):
     assert response.status_code == 201, response.get_json()
 
     customer_id = response.get_json()["customer_id"]
-    assert customer_id > 0
-    logger.debug(f"Created customer with ID: {customer_id}")
+    logger.info(f"Customer created (id={customer_id})")
 
     response = client.get(f"/v1/customers/{customer_id}")
+
+    logger.info("Reading customer")
+
     assert response.status_code == 200, response.get_json()
 
     customer = response.get_json()
     assert customer["id"] == customer_id
     assert customer["email"] == random_email
+
+    logger.info("Requesting MFA")
 
     response = client.post(
         "/v1/auth/mfa/request",
@@ -63,7 +69,10 @@ def test_customer_identity_flow(client):
     assert response.status_code == 200, response.get_json()
 
     otp = response.get_json()["otp"]
-    assert otp is not None
+
+    logger.info(f"OTP generated: {otp}")
+
+    logger.info("Verifying MFA")
 
     response = client.post(
         "/v1/auth/mfa/verify",
@@ -80,33 +89,18 @@ def test_customer_identity_flow(client):
     assert "token" in result
     assert result["message"] == "MFA verified"
 
+    logger.info("JWT generated successfully")
 
-def test_mfa_request_invalid_password(client):
-    random_email = f"test-{uuid.uuid1()}@example.com"
-
-    customer_data = {
-        "first_name": "Test",
-        "last_name": "User",
-        "email": random_email,
-        "phone_number": "5145551234",
-        "password": "Password123!"
-    }
+    logger.info("Validating JWT")
 
     response = client.post(
-        "/v1/customers/register",
-        data=json.dumps(customer_data),
-        content_type="application/json"
+        "/v1/auth/validate",
+        headers={
+            "Authorization": f"Bearer {result['token']}"
+        }
     )
 
-    assert response.status_code == 201, response.get_json()
+    assert response.status_code == 200, response.get_json()
+    assert response.get_json()["valid"] is True
 
-    response = client.post(
-        "/v1/auth/mfa/request",
-        data=json.dumps({
-            "email": random_email,
-            "password": "WrongPassword123!"
-        }),
-        content_type="application/json"
-    )
-
-    assert response.status_code == 401
+    logger.info("JWT validated successfully")

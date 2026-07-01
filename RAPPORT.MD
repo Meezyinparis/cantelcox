@@ -228,9 +228,9 @@ Tableau de navigation : où documenter chaque tâche du devoir. La matrice de tr
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ ≥ 5 UC Must (parmi UC-01 à UC-08) entièrement décrits et validés.
+> x ≥ 5 UC Must (parmi UC-01 à UC-08) entièrement décrits et validés.
 >
-> ☐ Priorisation MoSCoW justifiée et matrice de traçabilité UC ↔ domaines complétée.
+> x Priorisation MoSCoW justifiée et matrice de traçabilité UC ↔ domaines complétée.
 
 ## 1.1 Aperçu des exigences
 
@@ -255,7 +255,7 @@ Catalogue de référence des UC du cahier :
 
 **Justification de la priorisation MoSCoW**
 
-Les cas d'utilisation UC-01 à UC-05 ont été classés Must, car ils représentent les fonctionnalités essentielles permettant à un abonné de créer un compte, se connecter, activer une ligne mobile, souscrire à un forfait et consulter son usage. Ensemble, ils constituent le parcours principal de la plateforme et permettent de démontrer les principaux concepts du projet, tels que l'architecture microservices, la communication entre services, la persistance des données et l'observabilité. Les UC-06 (Paiement de facture), UC-07 (Détection de fraude) et UC-08 (Cycle de facturation mensuel) ont été priorisés respectivement comme Should et Could, puisqu'ils reposent sur des traitements plus avancés et peuvent être ajoutés dans une phase ultérieure sans empêcher le fonctionnement du produit minimal viable (MVP).
+Les cas d'utilisation UC-01 à UC-05 sont Must, car ils représentent les fonctionnalités essentielles permettant à un abonné de créer un compte, se connecter, activer une ligne mobile, souscrire à un forfait et consulter son usage. Ensemble, ils constituent le parcours principal de la plateforme et permettent de démontrer les principaux concepts du projet, tels que l'architecture microservices, la communication entre services, la persistance des données et l'observabilité. Les UC-06 (Paiement de facture), UC-07 (Détection de fraude) et UC-08 (Cycle de facturation mensuel) ont été priorisés respectivement comme Should et Could, puisqu'ils reposent sur des traitements plus avancés et peuvent être ajoutés dans autre phase.
 
 **Matrice de traçabilité UC ↔ domaines du cahier (bounded contexts)**
 
@@ -377,12 +377,11 @@ Le cadre télécom canadien impose des contraintes structurantes (à tracer vers
 
 ## 2.3 Contraintes organisationnelles & conventions
 
-- GitHub avec une branche `main` protégée et des branches de fonctionnalité (`feature/*`).
 - Conventions de nommage cohérentes pour le code, les commits et les endpoints REST.
 - Les secrets (JWT, mots de passe, clés API) sont stockés dans des variables d'environnement (`.env`) et ne sont jamais versionnés.
 - Toute la documentation est rédigée en français.
 - Les API sont documentées avec Swagger/OpenAPI et testées avec Postman.
-- L'ensemble du projet est conteneurisé avec Docker Compose afin d'assurer une exécution reproductible.
+- L'ensemble du projet est conteneurisé avec Docker Compose.
 
 **Note SIAG (encadrement labos) :** l’usage des systèmes d’IA générative est encadré — assistance au setup, au débogage et à la complétion permise, mais la production directe des livrables évalués peut faire l’objet d’une vérification orale ou écrite. Documentez votre usage.
 
@@ -404,7 +403,7 @@ Le cadre télécom canadien impose des contraintes structurantes (à tracer vers
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ Frontières de service tracées à partir des bounded contexts.
+> x Frontières de service tracées à partir des bounded contexts.
 
 ## 3.1 Contexte métier
 
@@ -414,11 +413,11 @@ Le cadre télécom canadien impose des contraintes structurantes (à tracer vers
 
 Systèmes externes simulés à intégrer via adapters (ports/adapters) :
 
-| **Système externe simulé** | **Rôle**                                                            | **Protocole / adaptateur**   |
-| -------------------------- | ------------------------------------------------------------------- | ---------------------------- |
-| Réseau mobile HLR/HSS      | Activation et gestion de l'état des lignes mobiles                  | API REST simulée (JSON/HTTP) |
-| Hub de portabilité         | Portabilité d'un numéro (MSISDN)                                    | API REST simulée (JSON/HTTP) |
-| Passerelle de paiement     | Paiement des factures mobiles (prévu pour UC-06, hors Phase 1 Must) | API REST simulée (JSON/HTTP) |
+| **Système externe simulé** | **Rôle**                                           | **Protocole / adaptateur**   |
+| -------------------------- | -------------------------------------------------- | ---------------------------- |
+| Réseau mobile HLR/HSS      | Activation et gestion de l'état des lignes mobiles | API REST simulée (JSON/HTTP) |
+| Hub de portabilité         | Portabilité d'un numéro (MSISDN)                   | API REST simulée (JSON/HTTP) |
+| Passerelle de paiement     | Paiement des factures mobiles (prévu pour phase 2) | API REST simulée (JSON/HTTP) |
 
 ## 3.3 Cartographie du domaine (DDD)
 
@@ -435,12 +434,11 @@ Bounded contexts du domaine télécom (frontières de service candidates) :
 
 **Carte des contextes (relations : upstream/downstream, ACL, conformist…) :**
 
-_[À compléter — insérer la carte des contextes DDD et décrire les relations]_
 ![DDD](docs/views/ddd-context-map.png)
 
-La carte des contextes montre que **Clients & Identité** est en amont des commandes, car une opération doit être liée à un client authentifié. **Commandes & Activations** utilise le **Catalogue & Offres** pour valider les forfaits, puis interagit avec **Lignes & Services** pour activer ou modifier une ligne. **Usage / Rating / Facturation** dépend des lignes actives pour produire l’usage et les factures. Les paiements sont isolés derrière une relation ACL afin de limiter le couplage avec la logique de facturation. Enfin, les événements importants sont transmis à **Conformité & Audit** pour assurer la traçabilité.
+La carte des contextes montre que Customer Identity donne l'authentification (MFA/JWT) au contexte Commerce, qui gère les forfaits, les lignes, les commandes, l'usage et la facturation. Les événements importants sont journalisés afin d'assurer la traçabilité.
 
-**Blocs DDD à matérialiser dans le code :** Ubiquitous Language (mêmes noms d’entités dans la doc, les diagrammes et le code), Value Objects (ex. ligne de commande sans identité propre hors de son agrégat), Aggregates (cohérence transactionnelle via commit/rollback), Repositories (masquage de la persistance, ségrégation lecture/écriture).
+Les principaux concepts DDD sont matérialisés par un Ubiquitous Language commun entre le code et la documentation, des Aggregates garantissant la cohérence transactionnelle (commit/rollback), et des Repositories/DAO encapsulant l'accès aux données.
 
 # 4. Stratégie de solution
 
@@ -460,32 +458,32 @@ La carte des contextes montre que **Clients & Identité** est en amont des comma
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ Dépendances dirigées (pas de cycles), couplage contrôlé aux frameworks.
+> x Dépendances dirigées (pas de cycles), couplage contrôlé aux frameworks.
 >
-> ☐ Bounded contexts mappés sur les services.
+> x Bounded contexts mappés sur les services.
 >
-> ☐ Swagger publié, collection Postman fonctionnelle, séparation domaine ↔ infra.
+> x Swagger publié, collection Postman fonctionnelle, séparation domaine ↔ infra.
 
 ## 4.1 Style architectural & découpage en services
 
-| **Décision**             | **Choix retenu**                                                                                                                                             | **Justification (→ ADR)**                                                                                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Style global             | Architecture basée par services (microservices)                                                                                                              | Permet de séparer les responsabilités métier, de déployer les services indépendamment et de respecter les exigences de modularité, observabilité et évolutivité. → ADR-001 |
-| Découpage (BC → service) | `customer-identity-service` pour Clients & Identité ; `commerce-service` pour Lignes & Services, Commandes & Activations, Catalogue & Offres, Usage et Audit | Découpage aligné sur les bounded contexts, tout en gardant une architecture réaliste avec 2 microservices pour la Phase 1. → ADR-001                                       |
-| Style par service        | Architecture hexagonale légère avec MVC pour l’API REST                                                                                                      | Sépare les routes/controllers, la logique métier, les repositories et les adaptateurs externes, ce qui facilite les tests et la maintenabilité. → ADR-001                  |
+| **Décision**             | **Choix retenu**                                                                 | **Justification (→ ADR)**                                                                                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Style global             | Architecture basée par services (microservices)                                  | Permet de séparer les responsabilités métier, de déployer les services indépendamment et de respecter les exigences de modularité, d'observabilité et d'évolutivité. → ADR-001             |
+| Découpage (BC → service) | `customer-identity-service` (Customer Identity) et `commerce-service` (Commerce) | Découpage aligné sur les deux bounded contexts retenus pour la Phase 1. Le contexte Commerce regroupe les fonctionnalités de catalogue, commandes, lignes, usage et facturation. → ADR-001 |
+| Style par service        | Architecture hexagonale légère avec MVC pour l'API REST                          | Sépare les contrôleurs, la logique métier, les repositories et les adaptateurs externes afin d'améliorer la maintenabilité et les tests. → ADR-001                                         |
 
 ## 4.2 Communication inter-services
 
-En Phase 1, les services communiquent entre eux avec des API REST en passant par l'API Gateway. Chaque service est responsable de son propre domaine et de sa base de données. Les appels vont toujours dans un seul sens, ce qui évite les dépendances circulaires et rend l'architecture plus simple à maintenir.
+En Phase 1, les services communiquent entre eux via des API REST en passant par l'API Gateway KrakenD. Chaque service est responsable de son propre domaine et possède sa propre base de données MySQL. Les opérations nécessitant une authentification utilisent un JWT émis par le customer-identity-service après validation du MFA, tandis que le commerce-service valide ce jeton avant d'exécuter les opérations sensibles.
 
 ## 4.3 Stratégie de l’API REST
 
-| **Aspect**      | **Convention retenue**                                                                                                                                   |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Versionnement   | `/v1/...`                                                                                                                                                |
-| Codes HTTP      | `200 OK`, `201 Created`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `409 Conflict`, `500 Internal Server Error` |
-| Format d’erreur | JSON : `{ "code": "...", "message": "...", "traceId": "..." }`                                                                                           |
-| Documentation   | OpenAPI/Swagger + collection Postman (Annexe A)                                                                                                          |
+| **Aspect**          | **Convention retenue**                                                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Versionnement       | `/v1/...`                                                                                                                    |
+| Codes HTTP          | `200 OK`, `201 Created`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `409 Conflict`, `500 Internal Server Error` |
+| Format des réponses | JSON (`application/json`) avec messages d'erreur ou de succès (`error`, `message`, données métier).                          |
+| Documentation       | OpenAPI/Swagger + collection Postman (Annexe A)                                                                              |
 
 ## 4.4 Référence industrielle TMF (optionnelle)
 
@@ -516,35 +514,36 @@ Les TMF Open APIs peuvent inspirer la conception. Mapping indicatif :
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ Agrégats clés identifiés (Profils abonnés, Lignes/MSISDN, Commandes, Forfaits, Factures).
+> x Agrégats clés identifiés (Profils abonnés, Lignes/MSISDN, Commandes, Forfaits, Factures).
 >
-> ☐ Séparation nette domaine ↔ infra ; pas de logique métier dans les controllers.
+> x Séparation nette domaine ↔ infra ; pas de logique métier dans les controllers.
 
 ## 5.1 Niveau 1 — Décomposition en services
 
-_[À compléter — diagramme « whitebox » du système : services, API Gateway, dépendances dirigées — insérer la figure et décrire chaque service (responsabilité, interface)]_
+![Whitebox](docs/views/whitebox.png)
 
 Le système CanTelcoX est exposé par KrakenD, qui sert de point d’entrée unique. Le `customer-identity-service` gère les profils abonnés, l’authentification et le MFA. Le `commerce-service` gère les lignes mobiles, le catalogue, les commandes et la consultation d’usage. Chaque service possède sa propre base MySQL, et Redis est utilisé uniquement par le service Commerce pour le cache.
 
 ## 5.2 Niveau 2 — Structure interne d’un service (hexagonal)
 
-_[À compléter — pour un service représentatif : couches domaine / application / infrastructure, ports & adapters — insérer le diagramme]_
+![Hexagonal](docs/views/hexagonal.png)
 
 ## 5.3 Modèle de domaine
 
 Agrégats clés à modéliser (un diagramme par bounded context retenu) :
 
-| **Agrégat**     | **Entités / Value Objects**                                               | **Invariants**                                                                                                          |
-| --------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Profil abonné   | `Customer`, `UserAccount`, `Address`, `IdentityVerification`, `MfaMethod` | Un profil doit avoir une identité vérifiée avant d'être activé. Un courriel ne peut appartenir qu'à un seul compte.     |
-| Ligne / MSISDN  | `MobileLine`, `MSISDN`, `SimCard`, `ESim`, `LineStatus`                   | Un MSISDN doit être unique. Une ligne doit être associée à un seul profil abonné actif.                                 |
-| Commande        | `Order`, `OrderItem`, `OrderStatus`, `IdempotencyKey`                     | Une commande avec la même clé d'idempotence ne doit être traitée qu'une seule fois.                                     |
-| Forfait / Offre | `Plan`, `Option`, `Promotion`, `EligibilityRule`                          | Un forfait ou une option doit être actif et admissible avant d'être commandé.                                           |
-| Facture         | `Invoice`, `InvoiceItem`, `BillingCycle`, `PaymentStatus`                 | Une facture ne doit être générée qu'une seule fois pour un même client, une même ligne et un même cycle de facturation. |
+| **Agrégat**       | **Entités / Value Objects**         | **Invariants**                                                                                                                                         |
+| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Profil abonné** | `Customer`, `UserAccount`, `MfaOtp` | Un courriel ne peut appartenir qu'à un seul compte. Un compte utilisateur est associé à un seul client. Un OTP ne peut être utilisé qu'une seule fois. |
+| **Ligne mobile**  | `MobileLine`                        | Une ligne mobile est associée à un seul client. Le numéro (`msisdn`) doit être unique.                                                                 |
+| **Commande**      | `Order`, `OrderItem`                | Une même clé d'idempotence ne doit pas permettre de créer plusieurs commandes.                                                                         |
+| **Forfait**       | `Plan`                              | Seuls les forfaits actifs peuvent être commandés.                                                                                                      |
+| **Usage**         | `UsageRecord`                       | Un enregistrement de consommation est associé à une seule ligne mobile.                                                                                |
+| **Facture**       | `Invoice`                           | Une facture est associée à une seule ligne mobile.                                                                                                     |
 
 ## 5.4 Organisation du code (vue Développement)
 
-_[À compléter — arborescence des modules/dépôts, conventions de packaging, dépendances entre couches]_
+![Arborescence](docs/views/tree.png)
 
 # 6. Vue d’exécution
 
@@ -563,21 +562,21 @@ _[À compléter — arborescence des modules/dépôts, conventions de packaging,
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ Scénario bout-en-bout démontrable dans la VM, erreurs normalisées JSON.
+> x Scénario bout-en-bout démontrable dans la VM, erreurs normalisées JSON.
 >
-> ☐ Double soumission d’une commande sans effet de bord (idempotence) illustrée.
+> x Double soumission d’une commande sans effet de bord (idempotence) illustrée.
 
 ## 6.1 Scénario bout-en-bout (E2E)
 
-_[À compléter — diagramme de séquence : inscription → MFA → activation → souscription → consultation usage (traversée des services + Gateway)]_
+![Diagramme de séquence E2E](docs/views/sequence.png)
 
 ## 6.2 Authentification & MFA (UC-02)
 
-_[À compléter — séquence MFA/OTP sur opération sensible]_
+![Diagramme de séquence UC-02](docs/views/sequenceUC02.png)
 
 ## 6.3 Idempotence & exactly-once à l’exécution
 
-_[À compléter — séquences : double soumission de commande (idempotency-key) et écriture de facturation exactly-once]_
+![Diagramme de séquence idempotence](docs/views/sequence6_3.png)
 
 # 7. Vue de déploiement
 
@@ -597,29 +596,29 @@ _[À compléter — séquences : double soumission de commande (idempotency-key)
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ docker compose up lance l’ensemble ; healthchecks OK.
+> x docker compose up lance l’ensemble ; healthchecks OK.
 >
-> ☐ Appels fonctionnels via la Gateway ; configuration versionnée.
+> x Appels fonctionnels via la Gateway ; configuration versionnée.
 
 ## 7.1 Topologie de déploiement
 
-_[À compléter — diagramme de déploiement : conteneurs, réseaux, volumes, healthchecks — insérer la figure]_
+![Diagramme de déploiement](docs/views/deployment.png)
 
 ## 7.2 API Gateway
-**Configuration**                                                                                                                     
-| **Capacité Gateway** |                                         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Routage dynamique    | Routes `/v1/auth/*` et `/v1/customers/*` vers `customer-identity-service`; routes `/v1/catalog/*`, `/v1/orders/*`, `/v1/lines/*` et `/v1/usage/*` vers `commerce-service`.    |
-| En-têtes             | Transmission des headers `Authorization`, `X-Request-Id` et `Idempotency-Key`. Une clé API (`X-API-Key`) peut être ajoutée ultérieurement pour protéger l'accès à la Gateway. |
-| CORS                 | Origines autorisées : `http://localhost:3000` et `http://localhost:8080`.                                                                                                     |
-| Produit retenu       | `KrakenD` — point d'entrée unique des appels API et routage vers les microservices internes.                                                                                  |
-| Timeout              | Délai maximal de réponse de `3 s` par route.                                                                                                                                  |
-| Throttling / quota   | Limite simple par client (ou clé API), par exemple `100 requêtes/minute`, afin de réduire les abus et protéger les services internes.                                         |
+
+**Configuration**
+
+| **Capacité Gateway** | **Mise en œuvre**                                                                                                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Routage              | Routes `/v1/auth/*` et `/v1/customers/*` vers `customer-identity-service`; routes `/v1/catalog/*`, `/v1/orders/*`, `/v1/lines/*`, `/v1/usage/*` et `/v1/invoices/*` vers `commerce-service`. |
+| En-têtes             | Transmission des headers `Authorization`, `Content-Type` et `Idempotency-Key`.                                                                                                               |
+| Produit retenu       | `KrakenD` — point d'entrée unique des appels API et routage vers les microservices internes.                                                                                                 |
+| Timeout              | Délai maximal de réponse de `3 s`.                                                                                                                                                           |
+| Throttling / quota   | Limite simple configurée sur certaines routes sensibles, par exemple `100 requêtes/minute`.                                                                                                  |
 
 ## 7.3 Load balancing & tolérance aux pannes
 
 _[À compléter — amont (NGINX/HAProxy/Traefik), stratégie d’équilibrage, plan de test N = 1..4 et kill d’instance (résultats au §10.6)]_
-
 
 # 8. Concepts transversaux
 
@@ -639,11 +638,11 @@ _[À compléter — amont (NGINX/HAProxy/Traefik), stratégie d’équilibrage, 
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ CRUD robuste, rollback sur erreur, double soumission sans effet de bord.
+> x CRUD robuste, rollback sur erreur, double soumission sans effet de bord.
 >
-> ☐ Garantie exactly-once sur écritures de facturation ; journal append-only opérationnel.
+> x Garantie exactly-once sur écritures de facturation ; journal append-only opérationnel.
 >
-> ☐ Aucun secret en clair ; MFA fonctionnel sur UC-02 et UC-03.
+> x Aucun secret en clair ; MFA fonctionnel sur UC-02 et UC-03.
 >
 > ☐ 4 Golden Signals observés (P95/P99, RPS, 4xx/5xx, saturation).
 >
@@ -651,25 +650,21 @@ _[À compléter — amont (NGINX/HAProxy/Traefik), stratégie d’équilibrage, 
 
 ## 8.1 Persistance & intégrité
 
-_[À compléter — choix ORM/DAO, transactions, contraintes (unicité MSISDN, FK profils ↔ lignes, index), migrations reproductibles, données seed (schéma détaillé en Annexe B)]_
+La persistance est séparée par microservice : identity_db pour le customer-identity-service et commerce_db pour le commerce-service. SQLAlchemy est utilisé comme ORM avec une séparation commands/queries. L'intégrité est assurée par des clés étrangères et des contraintes d'unicité (`email`, `msisdn`, `sim_number`, `idempotency_key`, `(customer_id, line_id, billing_cycle)`).
 
 ## 8.2 Idempotence (commandes & activations)
 
-L'idempotence est appliquée aux opérations sensibles comme la prise de commande et l'activation d'une ligne. Chaque requête doit contenir une clé `Idempotency-Key`, unique pour une même opération client. Cette clé est stockée dans la base de données avec le type d'opération, le client, le statut et la réponse retournée.
-
-La clé est conservée pendant une fenêtre de rejeu de 24 heures. Si la même requête est envoyée une deuxième fois avec la même clé, le système ne recrée pas la commande : il retourne la réponse déjà enregistrée. Si la clé existe mais que le contenu de la requête est différent, le système retourne une erreur `409 Conflict`.
+Les commandes utilisent une clé `Idempotency-Key` unique afin d'éviter les traitements en double. Cette clé est stockée dans la base de données (`UNIQUE`) et une même requête retourne toujours le même résultat. Une requête différente avec une clé déjà utilisée est rejetée (`409 Conflict`).
 
 ## 8.3 Exactly-once (facturation)
 
-Les écritures de facturation sont protégées par une garantie d'écriture unique. Avant de créer une facture, le service vérifie s'il existe déjà une facture pour le même `customer_id`, `line_id` et `billing_cycle`. Une contrainte unique est aussi ajoutée en base de données sur ces trois champs afin d'empêcher les doublons même en cas de double appel ou de concurrence.
+La facturation garantit une seule création de facture par `customer_id`, `line_id` et `billing_cycle` grâce à une contrainte `UNIQUE` en base de données. La création de la facture est exécutée dans une transaction afin d'assurer la cohérence des données.
 
 La génération de facture est exécutée dans une transaction : création de la facture, ajout des lignes de facture et écriture dans le journal d'audit. Si une erreur survient, toute la transaction est annulée. Pour les événements liés à la facturation, une table `outbox_events` peut être utilisée afin d'enregistrer l'événement dans la même transaction que la facture, puis de le publier ensuite de manière fiable.
 
 ## 8.4 Journal d’audit append-only (CRTC / Loi 25)
 
-Le système conserve un journal d'audit append-only afin d'assurer la traçabilité des opérations importantes. Chaque événement contient un identifiant, la date et l'heure, le type d'événement, l'utilisateur concerné, le service ayant effectué l'action, ainsi que les informations nécessaires au suivi (ex. `traceId`, `requestId`).
-
-Les événements consignés incluent l'inscription, l'authentification, les activations de lignes, les commandes, les modifications de forfaits, les consultations sensibles et les opérations de facturation. Les enregistrements ne peuvent pas être modifiés ou supprimés : seuls de nouveaux événements peuvent être ajoutés, ce qui garantit l'immutabilité du journal et facilite les audits liés au CRTC et à la Loi 25.
+Les opérations importantes (inscription, MFA, activation de ligne, commandes et facturation) sont enregistrées dans une table d'audit append-only. Les événements sont uniquement ajoutés, jamais modifiés ni supprimés, afin d'assurer la traçabilité et de répondre aux exigences du CRTC et de la Loi 25.
 
 ## 8.5 Sécurité applicative
 
@@ -683,11 +678,11 @@ Les événements consignés incluent l'inscription, l'authentification, les acti
 
 ## 8.6 Contrôles anti-fraude
 
-Des contrôles de base sont mis en place pour limiter les fraudes les plus courantes. Une authentification MFA est exigée avant l'activation d'une ligne ou toute modification importante. Les changements répétés de SIM (SIM swap), les activations multiples sur un même compte et les commandes inhabituelles sont consignés dans le journal d'audit et peuvent être signalés pour vérification. Les règles sont validées par des tests unitaires et d'intégration.
+L'authentification MFA est requise avant les opérations sensibles, comme l'activation d'une ligne. Les actions importantes sont consignées dans le journal d'audit afin d'assurer la traçabilité et de faciliter la détection d'activités inhabituelles.
 
 ## 8.7 Gestion d'erreurs & versionnement
 
-Les API utilisent un format d'erreur JSON uniforme afin de retourner des réponses cohérentes entre les microservices. Les erreurs sont associées aux codes HTTP appropriés (400, 401, 404, 409 et 500) et les réponses peuvent contenir un code, un message ainsi qu'un traceId lorsque disponible pour faciliter le débogage et la traçabilité. Toutes les API sont versionnées avec le préfixe /v1, ce qui permet de faire évoluer les services sans briser la compatibilité avec les clients existants.
+Les API utilisent des réponses JSON avec les codes HTTP appropriés (`400`, `401`, `403`, `404`, `409`, `500`). Toutes les API sont versionnées avec le préfixe `/v1` afin de permettre l'évolution des services tout en conservant la compatibilité avec les clients existants.
 
 ## 8.8 Observabilité (4 Golden Signals)
 
@@ -695,14 +690,13 @@ Les API utilisent un format d'erreur JSON uniforme afin de retourner des répons
 | ----------------- | ------------------- | --------------------------------- |
 | Latence           | P95 / P99           | P95 ≤ 500 ms                      |
 | Trafic            | RPS                 | ≥ 600 ops/s                       |
-| Erreurs           | Taux 4xx / 5xx      | Surveillé via Prometheus/Grafana  |
+| Erreurs           | Taux 4xx / 5xx      | Surveillé via Locust              |
 | Saturation        | CPU / RAM / threads | Surveillée via Prometheus/Grafana |
 
 Logs structurés + Prometheus + dashboards Grafana ; captures au §10.5.
 
 ## 8.9 Caching
 
-_[À compléter — endpoints mis en cache (catalogue de forfaits, consultation usage), TTL, invalidation lors des mises à jour catalogue, risque de données périmées (stale) — gains chiffrés au §10.7]_
 Les données les plus consultées sont mises en cache dans Redis afin de réduire la charge sur MySQL et d'améliorer les temps de réponse.
 
 | **Endpoint**                       | **TTL** | **Invalidation**                                                                 | **Risque de données périmées**                                                                             |
@@ -710,7 +704,6 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 | `GET /v1/catalog/plans`            | 10 min  | À chaque création, modification ou suppression d'un forfait.                     | Faible : un ancien forfait peut être affiché pendant quelques minutes.                                     |
 | `GET /v1/usage/{line_id}`          | 1 min   | À chaque mise à jour de la consommation ou à l'expiration du TTL.                | Faible : l'usage affiché peut avoir jusqu'à une minute de retard.                                          |
 | `GET /v1/lines/{line_id}/invoices` | 5 min   | À la création, au paiement, à la suppression ou à la régénération d'une facture. | Faible : une facture récente ou un changement de statut peut être visible avec quelques minutes de retard. |
-
 
 # 9. Décisions d’architecture (ADR)
 
@@ -728,39 +721,40 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ Format ADR complet (statut, contexte, décision, conséquences).
+> x Format ADR complet (statut, contexte, décision, conséquences).
 >
-> ☐ Chaque ADR explicitement traçable à une exigence du cahier.
+> x Chaque ADR explicitement traçable à une exigence du cahier.
+
 
 ## ADR-001 — Style architectural & découpage en services
 
-|                               |                                                                                                                                                                                                                                            |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Statut**                    | Accepté                                                                                                                                                                                                                                    |
-| **Contexte**                  | Le projet doit être basé sur des microservices, respecter les bounded contexts DDD et être facilement déployable avec Docker Compose.                                                                                                      |
-| **Décision**                  | Utiliser une architecture microservices avec deux services implémentés pour la phase 1(`customer-identity-service` et `commerce-service`) exposés via une API Gateway (KrakenD). Chaque service suit une architecture hexagonale.          |
-| **Conséquences**              | **Positives :** meilleure séparation des responsabilités, évolution indépendante des services, conformité avec le DDD. **Négatives :** communications réseau supplémentaires, configuration et déploiement plus complexes qu'un monolithe. |
-| **Exigence du cahier tracée** | Analyse métier & DDD, Architecture distribuée, Microservices & API Gateway (sections 1, 2 et 4 de la grille).                                                                                                                              |
+| Élément | Description |
+|---|---|
+| **Statut** | Accepté |
+| **Contexte** | Le projet doit être basé sur des microservices, respecter les bounded contexts DDD et être facilement déployable avec Docker Compose. |
+| **Décision** | Utiliser une architecture microservices avec deux services implémentés pour la phase 1 (`customer-identity-service` et `commerce-service`) exposés via une API Gateway (KrakenD). Chaque service suit une architecture hexagonale légère. |
+| **Conséquences** | **Positives :** meilleure séparation des responsabilités, évolution indépendante des services, conformité avec le DDD. **Négatives :** communications réseau supplémentaires, configuration et déploiement plus complexes qu'un monolithe. |
+| **Exigence du cahier tracée** | Analyse métier & DDD, Architecture distribuée, Microservices & API Gateway (sections 1, 2 et 4 de la grille). |                                                                                                                     |
 
 ## ADR-002 — Persistance & transactions (idempotence / exactly-once / append-only)
 
-|                               |                                                                                                                                                                                                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Statut**                    | Accepté                                                                                                                                                                                                                                                         |
-| **Contexte**                  | Les commandes, activations et facturations doivent éviter les doublons et assurer une traçabilité conforme au cahier des charges.                                                                                                                               |
-| **Décision**                  | Chaque microservice possède sa propre base MySQL. Les commandes utilisent une `Idempotency-Key`, la facturation est conçue pour garantir une écriture unique (exactly-once) et toutes les opérations importantes sont enregistrées dans un journal append-only. |
-| **Conséquences**              | **Positives :** intégrité des données, prévention des doublons, meilleure auditabilité. **Négatives :** logique métier plus complexe et gestion supplémentaire des transactions.                                                                                |
-| **Exigence du cahier tracée** | Persistance & intégrité, conformité CRTC/Loi 25, idempotence, exactly-once et audit append-only (sections 3 et 8).                                                                                                                                              |
+| Élément | Description |
+|---|---|
+| **Statut** | Accepté |
+| **Contexte** | Les commandes, activations et facturations doivent éviter les doublons et assurer une traçabilité conforme au cahier des charges. |
+| **Décision** | Chaque microservice possède sa propre base MySQL. Les commandes utilisent une `Idempotency-Key`, la facturation garantit une écriture unique grâce à une contrainte d'unicité et les opérations importantes sont enregistrées dans un journal d'audit append-only. |
+| **Conséquences** | **Positives :** intégrité des données, prévention des doublons, meilleure auditabilité. **Négatives :** logique métier plus complexe et gestion supplémentaire des transactions. |
+| **Exigence du cahier tracée** | Persistance & intégrité, conformité CRTC/Loi 25, idempotence, exactly-once et audit append-only (sections 3 et 8). |                                                                                                                                       |
 
 ## ADR-003 — Stratégie d'erreurs & versionnement d'API
 
-|                               |                                                                                                                                                                                                             |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Statut**                    | Accepté                                                                                                                                                                                                     |
-| **Contexte**                  | Les microservices doivent exposer une API cohérente et facile à maintenir tout en simplifiant le débogage.                                                                                                  |
-| **Décision**                  | Toutes les API sont versionnées avec le préfixe `/v1` et utilisent un format d'erreur JSON commun (`code`, `message`, `traceId`) accompagné des codes HTTP standards.                                       |
-| **Conséquences**              | **Positives :** cohérence entre les services, évolution de l'API sans casser les clients existants, débogage facilité. **Négatives :** maintenance de plusieurs versions d'API lors des évolutions futures. |
-| **Exigence du cahier tracée** | Architecture & API REST, stratégie d'erreurs, versionnement, Swagger/OpenAPI (sections 2 et 8).                                                                                                             |
+| Élément | Description |
+|---|---|
+| **Statut** | Accepté |
+| **Contexte** | Les microservices doivent exposer une API cohérente et facile à maintenir tout en simplifiant le débogage. |
+| **Décision** | Toutes les API sont versionnées avec le préfixe `/v1` et utilisent des réponses JSON avec les codes HTTP appropriés (`400`, `401`, `403`, `404`, `409`, `500`). |
+| **Conséquences** | **Positives :** cohérence entre les services, évolution de l'API sans casser les clients existants, débogage facilité. **Négatives :** nécessité de maintenir les versions d'API lors des évolutions futures. |
+| **Exigence du cahier tracée** | Architecture & API REST, stratégie d'erreurs, versionnement, Swagger/OpenAPI (sections 2 et 8). |                                                                                                       |
 
 # 10. Exigences de qualité
 
@@ -786,22 +780,23 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 
 ### 10.1 Arbre de qualité
 
-| Priorité | Qualité | Objectif | Scénario mesurable |
-|---|---|---|---|
-| 1 | Performance | Garder les API rapides sous charge nominale | UC-04 et UC-05 doivent rester sous une latence P95 ≤ 500 ms. |
-| 2 | Disponibilité | Continuer à servir les requêtes malgré une panne partielle | Si une instance du commerce-service tombe, les autres instances doivent continuer à répondre via le load balancer. |
-| 3 | Sécurité | Protéger les opérations sensibles | Les opérations comme l’activation de ligne et le MFA exigent un JWT/MFA valide. |
-| 4 | Auditabilité | Garder une trace des opérations importantes | Les activations, commandes et factures sont journalisées dans un audit log append-only. |
-| 5 | Maintenabilité | Faciliter l’évolution du système | Les services sont séparés par domaine, versionnés en `/v1`, documentés avec Swagger/OpenAPI et testés en CI. |
+| Priorité | Qualité        | Objectif                                                   | Scénario mesurable                                                                                                 |
+| -------- | -------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1        | Performance    | Garder les API rapides sous charge nominale                | UC-04 et UC-05 doivent rester sous une latence P95 ≤ 500 ms.                                                       |
+| 2        | Disponibilité  | Continuer à servir les requêtes malgré une panne partielle | Si une instance du commerce-service tombe, les autres instances doivent continuer à répondre via le load balancer. |
+| 3        | Sécurité       | Protéger les opérations sensibles                          | Les opérations comme l’activation de ligne et le MFA exigent un JWT/MFA valide.                                    |
+| 4        | Auditabilité   | Garder une trace des opérations importantes                | Les activations, commandes et factures sont journalisées dans un audit log append-only.                            |
+| 5        | Maintenabilité | Faciliter l’évolution du système                           | Les services sont séparés par domaine, versionnés en `/v1`, documentés avec Swagger/OpenAPI et testés en CI.       |
 
 ## 10.2 Scénarios de qualité
-| **Attribut** | **Stimulus** | **Réponse attendue / mesure** |
-| ------------ | ------------ | ----------------------------- |
-| Performance | Consultation usage à cadence élevée (UC-04) | P95 ≤ 500 ms |
-| Capacité | Montée en charge | ≥ 600 ops/s avant saturation |
-| Disponibilité | Kill d’une instance en charge | Maintien de 95 % de disponibilité |
-| Sécurité | Opération sensible sans MFA | Refus + journalisation |
-| Auditabilité | Création d’une commande, activation ou facture | Événement écrit dans `audit_logs` avec traceId |_               |
+
+| **Attribut**  | **Stimulus**                                   | **Réponse attendue / mesure**                  |
+| ------------- | ---------------------------------------------- | ---------------------------------------------- |
+| Performance   | Consultation usage à cadence élevée (UC-04)    | P95 ≤ 500 ms                                   |
+| Capacité      | Montée en charge                               | ≥ 600 ops/s avant saturation                   |
+| Disponibilité | Kill d’une instance en charge                  | Maintien de 95 % de disponibilité              |
+| Sécurité      | Opération sensible sans MFA                    | Refus + journalisation                         |
+| Auditabilité  | Création d’une commande, activation ou facture | Événement écrit dans `audit_logs` avec traceId |
 
 ## 10.3 Cibles NFR & résultats
 
@@ -815,27 +810,21 @@ Synthèse ; le détail des mesures et les captures figurent aux §10.5 à §10.8
 
 ## 10.4 Stratégie de tests & couverture
 
-_[À compléter — pyramide de tests (unit → intégration → E2E), scénarios E2E télécom (inscription → MFA → activation → souscription → paiement)]_
-
-_Couverture mesurée sur le domaine critique : [À compléter] % (cible ≥ 80 %)._
-
-
 La stratégie de tests suit une pyramide simple : tests unitaires, tests d'intégration et tests bout-en-bout. Les tests unitaires avec `pytest` valident les fonctions critiques des services, notamment la création de clients, la demande MFA, la vérification MFA, la consultation des forfaits, l'activation de ligne, la création de commande, la consultation d'usage et la consultation des factures.
 
 Les tests d'intégration sont exécutés dans Docker Compose afin de vérifier les interactions réelles entre les microservices, MySQL, Redis et KrakenD. Les collections Postman servent à valider manuellement les API REST exposées par la Gateway et à démontrer les scénarios métier principaux.
 
 Le scénario E2E principal couvre le parcours suivant : inscription d'un client, demande d'un code MFA, vérification du MFA, activation d'une ligne mobile, souscription à un forfait, consultation de l'usage et consultation des factures. Ce scénario permet de vérifier la cohérence entre le `customer-identity-service`, le `commerce-service` et l'API Gateway.
 
-| Niveau | Outil | Objectif |
-|---|---|---|
-| Tests unitaires | `pytest` | Vérifier les fonctions critiques et les contrôleurs des microservices. |
-| Tests d'intégration | `pytest` + Docker Compose | Valider les interactions avec MySQL, Redis et les appels interservices. |
-| Tests API | Postman | Tester les routes REST via KrakenD et documenter les scénarios métier. |
-| Tests E2E | Postman / pytest | Exécuter le parcours complet inscription → MFA → activation → souscription → usage/factures. |
-| Tests de charge | Locust | Mesurer la latence P95/P99, le débit RPS et le taux d'erreurs. |
+| Niveau              | Outil                     | Objectif                                                                                     |
+| ------------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
+| Tests unitaires     | `pytest`                  | Vérifier les fonctions critiques et les contrôleurs des microservices.                       |
+| Tests d'intégration | `pytest` + Docker Compose | Valider les interactions avec MySQL, Redis et les appels interservices.                      |
+| Tests API           | Postman                   | Tester les routes REST via KrakenD et documenter les scénarios métier.                       |
+| Tests E2E           | Postman / pytest          | Exécuter le parcours complet inscription → MFA → activation → souscription → usage/factures. |
+| Tests de charge     | Locust                    | Mesurer la latence P95/P99, le débit RPS et le taux d'erreurs.                               |
 
 Couverture mesurée sur le domaine critique : **à mesurer avec `pytest-cov`**. La cible retenue est **≥ 80 %**.
-
 
 ## 10.5 Résultats des campagnes de charge
 
@@ -900,43 +889,70 @@ _Tolérance aux pannes (kill d’instance en charge) : [À compléter — mainti
 
 **Critères d’acceptation (à cocher)**
 
-> ☐ Glossaire validé.
+> x Glossaire validé.
 
 ## 12.1 Langage métier
 
-| **Terme**                     | **Définition**                                | **Bounded context** |
-| ----------------------------- | --------------------------------------------- | ------------------- |
-| _[À compléter — ex. MSISDN]_  | _[À compléter — identifiant de ligne mobile]_ | Lignes & Services   |
-| _[À compléter — ex. Forfait]_ | _[À compléter — …]_                           | Catalogue & Offres  |
-| _[À compléter — …]_           | _[À compléter — …]_                           | _[À compléter — …]_ |
+| **Terme**                | **Définition**                                                                    | **Bounded context** |
+| ------------------------ | --------------------------------------------------------------------------------- | ------------------- |
+| **MSISDN**               | Numéro de téléphone unique associé à une ligne mobile.                            | Commerce            |
+| **Forfait**              | Offre commerciale comprenant des quotas de données, voix et SMS.                  | Commerce            |
+| **Ligne mobile**         | Service mobile activé pour un client, identifié par un MSISDN et une carte SIM.   | Commerce            |
+| **Commande**             | Demande de souscription à un ou plusieurs forfaits.                               | Commerce            |
+| **Facture**              | Document regroupant les frais d'un cycle de facturation.                          | Commerce            |
+| **Consommation (Usage)** | Quantité de données, minutes et SMS utilisée par une ligne mobile.                | Commerce            |
+| **Client**               | Personne inscrite auprès de CanTelcoX.                                            | Customer Identity   |
+| **Compte utilisateur**   | Compte servant à l'authentification de l'utilisateur (courriel et mot de passe).  | Customer Identity   |
+| **MFA**                  | Authentification multifacteur utilisant un code OTP avant une opération sensible. | Customer Identity   |
+| **OTP**                  | Code à usage unique utilisé pour valider une authentification MFA.                | Customer Identity   |
+| **JWT**                  | Jeton d'authentification remis après une validation MFA réussie.                  | Customer Identity   |
 
 ## 12.2 Acronymes
 
-| **Acronyme**        | **Signification**                                                  |
-| ------------------- | ------------------------------------------------------------------ |
-| BSS                 | Business Support System                                            |
-| CRTC                | Conseil de la radiodiffusion et des télécommunications canadiennes |
-| HLR/HSS             | Home Location Register / Home Subscriber Server                    |
-| MSISDN              | Mobile Station International Subscriber Directory Number           |
-| MFA / OTP           | Authentification multifacteur / mot de passe à usage unique        |
-| NFR                 | Exigence non fonctionnelle                                         |
-| **ADR**             | Architecture Decision Record                                       |
-| TMF                 | TM Forum (Open APIs)                                               |
-| _[À compléter — …]_ | _[À compléter — …]_                                                |
+| **Acronyme** | **Signification**                                                  |
+| ------------ | ------------------------------------------------------------------ |
+| BSS          | Business Support System                                            |
+| CRTC         | Conseil de la radiodiffusion et des télécommunications canadiennes |
+| HLR/HSS      | Home Location Register / Home Subscriber Server                    |
+| MSISDN       | Mobile Station International Subscriber Directory Number           |
+| MFA          | Multi-Factor Authentication                                        |
+| OTP          | One-Time Password                                                  |
+| JWT          | JSON Web Token                                                     |
+| API          | Application Programming Interface                                  |
+| REST         | Representational State Transfer                                    |
+| ORM          | Object-Relational Mapping                                          |
+| CQRS         | Command Query Responsibility Segregation                           |
+| DAO          | Data Access Object                                                 |
+| NFR          | Non-Functional Requirement                                         |
+| ADR          | Architecture Decision Record                                       |
+| TMF          | TM Forum (Open APIs)                                               |
+| TTL          | Time To Live (durée de vie d'une entrée de cache)                  |
+| CI/CD        | Continuous Integration / Continuous Deployment                     |
+| RPS          | Requests Per Second                                                |
+| P95 / P99    | 95e / 99e percentile des temps de réponse                          |
+| SLA          | Service Level Agreement                                            |
 
 # Annexe A — Contrats d’API & catalogue d’endpoints
 
-Référez le fichier OpenAPI/Swagger publié et la collection Postman (chemins dans le dépôt).
+| **Méthode + Route (/v1)**          | **UC** | **Service**                 | **Auth / MFA**          |
+| ---------------------------------- | ------ | --------------------------- | ----------------------- |
+| `POST /v1/customers/register`      | UC-01  | `customer-identity-service` | Non                     |
+| `POST /v1/auth/mfa/request`        | UC-02  | `customer-identity-service` | Courriel + mot de passe |
+| `POST /v1/auth/mfa/verify`         | UC-02  | `customer-identity-service` | OTP / MFA               |
+| `POST /v1/lines/activate`          | UC-03  | `commerce-service`          | JWT après MFA           |
+| `GET /v1/usage/{line_id}`          | UC-04  | `commerce-service`          | JWT                     |
+| `GET /v1/lines/{line_id}/invoices` | UC-04  | `commerce-service`          | JWT                     |
+| `POST /v1/orders`                  | UC-05  | `commerce-service`          | Idempotency-Key   |
+| `GET /v1/catalog/plans`            | UC-05  | `commerce-service`          | Non                     |
 
-| **Méthode + Route (/v1)**                      | **UC**              | **Service**         | **Auth / MFA**      |
-| ---------------------------------------------- | ------------------- | ------------------- | ------------------- |
-| _[À compléter — POST /v1/customers]_           | UC-01               | _[À compléter — …]_ | _[À compléter — …]_ |
-| _[À compléter — POST /v1/auth/mfa]_            | UC-02               | _[À compléter — …]_ | MFA                 |
-| _[À compléter — POST /v1/lines/{id}/activate]_ | UC-03               | _[À compléter — …]_ | MFA                 |
-| _[À compléter — GET /v1/usage]_                | UC-04               | _[À compléter — …]_ | _[À compléter — …]_ |
-| _[À compléter — …]_                            | _[À compléter — …]_ | _[À compléter — …]_ | _[À compléter — …]_ |
+Liens :
 
-_Liens : Swagger = [À compléter] · Postman = [À compléter]_
+- Swagger
+  - [OpenApi Identity](customer-identity-service/src/static/openapi.yml)
+  - [OpenApi Commerce](commerce-service/src/static/openapi.yml)
+- Postman
+  - [Identity](customer-identity-service/docs/collections/customer_service.postman_collection.json)
+  - [Commerce](commerce-service/docs/collections/commerce_service.postman_collection.json)
 
 # Annexe B — Schéma de persistance
 
@@ -994,8 +1010,8 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 <td>§1.1, §1.2</td>
 <td>§1.2 — ≥ 5 UC validés</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="odd">
 <td><strong>1.2 DDD</strong></td>
@@ -1013,16 +1029,16 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 <td>§4.1, §4.2, §5.2</td>
 <td>§4.2, §5.1 ; §4.1</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="even">
 <td><strong>2.2 API REST</strong></td>
 <td>§4.3, §4.4, Annexe A</td>
 <td>Annexe A ; §5.2/§5.4</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="odd">
 <td><strong>2.3 4+1 / Arc42</strong></td>
@@ -1037,8 +1053,8 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 <td>§9 (ADR-001/002/003)</td>
 <td>§9 — tracé au cahier</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="odd">
 <td colspan="5"><strong>3) Persistance &amp; intégrité</strong></td>
@@ -1175,24 +1191,24 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 <td>§7.1, Annexe C</td>
 <td>Annexe C — compose up, /health</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="even">
 <td><strong>8.2 CI</strong></td>
 <td>Annexe C</td>
 <td>Annexe C — CI &lt; 10 min</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="odd">
 <td><strong>8.3 CD</strong></td>
 <td>Annexe C</td>
 <td>Annexe C — déploiement 1 commande</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="even">
 <td colspan="5"><strong>9) Documentation finale &amp; démo</strong></td>
@@ -1218,13 +1234,13 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 
 ## D.2 Définition de Fini (DoD)
 
-> ☐ ≥ 5 UC Must implémentés bout-en-bout via l’API REST, erreurs normalisées.
+> x ≥ 5 UC Must implémentés bout-en-bout via l’API REST, erreurs normalisées.
 >
-> ☐ ≥ 2 microservices conteneurisés + DB + Prometheus + Grafana + API Gateway, déployables via docker-compose.
+> x ≥ 2 microservices conteneurisés + DB + Prometheus + Grafana + API Gateway, déployables via docker-compose.
 >
-> ☐ Idempotence (commandes/activations), exactly-once (facturation), journal append-only opérationnels.
+> x Idempotence (commandes/activations), exactly-once (facturation), journal append-only opérationnels.
 >
-> ☐ Tests automatisés en CI (unit, intégration, E2E), couverture ≥ 80 % sur le domaine critique.
+> x Tests automatisés en CI (unit, intégration, E2E), couverture ≥ 80 % sur le domaine critique.
 >
 > ☐ 4 Golden Signals observés ; paliers NFR atteints ou écarts argumentés (P95 ≤ 500 ms, ≥ 600 ops/s, dispo 95 %).
 >
@@ -1232,26 +1248,26 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 >
 > ☐ LB et cache en production (compose) avec impacts chiffrés.
 >
-> ☐ API Gateway opérationnelle ; direct vs gateway comparés et argumentés.
+> x API Gateway opérationnelle ; direct vs gateway comparés et argumentés.
 >
-> ☐ 4+1 cohérent, Arc42 (sections cœur), ≥ 3 ADR approuvés ; CI/CD fonctionnels.
+> x 4+1 cohérent, Arc42 (sections cœur), ≥ 3 ADR approuvés ; CI/CD fonctionnels.
 >
 > ☐ Logs structurés ; runbook & guide de démo à jour.
 >
-> ☐ Rapport PDF + dépôt projet (zip) remis sur Moodle ; reproductibilité \< 30 min sur VM.
+> x Rapport PDF + dépôt projet (zip) remis sur Moodle ; reproductibilité \< 30 min sur VM.
 
 ## D.3 Auto-évaluation (grille de l’énoncé)
 
-| **Critère**                            | **Pond.** | **Section(s) de preuve**   | **Auto-éval**               |
-| -------------------------------------- | --------- | -------------------------- | --------------------------- |
-| 1\. Analyse métier & DDD               | 12 %      | **§1, §3.3, §5.3, §12**    | _[À compléter — A/B/C/D/F]_ |
-| 2\. Architecture, décisions & API REST | 18 %      | **§4, §5, §9, Annexe A**   | _[À compléter — …]_         |
-| 3\. Persistance & intégrité            | 12 %      | **§8.1–8.4, Annexe B**     | _[À compléter — …]_         |
-| 4\. Microservices & API Gateway        | 18 %      | **§5.1, §7.2, §10.8**      | _[À compléter — …]_         |
-| 5\. Observabilité & tests de charge    | 10 %      | **§8.8, §10.5**            | _[À compléter — …]_         |
-| 6\. Load balancing & caching           | 10 %      | **§7.3, §8.9, §10.6–10.7** | _[À compléter — …]_         |
-| 7\. Qualité, tests & sécurité          | 10 %      | **§8.5–8.7, §10.4**        | _[À compléter — …]_         |
-| 8\. CI/CD, documentation & démo        | 10 %      | **§7.1, Annexe C**         | _[À compléter — …]_         |
+| **Critère**                            | **Pond.** | **Section(s) de preuve**   | **Auto-éval** |
+| -------------------------------------- | --------- | -------------------------- | ------------- |
+| 1\. Analyse métier & DDD               | 12 %      | **§1, §3.3, §5.3, §12**    | B             |
+| 2\. Architecture, décisions & API REST | 18 %      | **§4, §5, §9, Annexe A**   | A             |
+| 3\. Persistance & intégrité            | 12 %      | **§8.1–8.4, Annexe B**     | A             |
+| 4\. Microservices & API Gateway        | 18 %      | **§5.1, §7.2, §10.8**      | A             |
+| 5\. Observabilité & tests de charge    | 10 %      | **§8.8, §10.5**            | C             |
+| 6\. Load balancing & caching           | 10 %      | **§7.3, §8.9, §10.6–10.7** | D             |
+| 7\. Qualité, tests & sécurité          | 10 %      | **§8.5–8.7, §10.4**        | B             |
+| 8\. CI/CD, documentation & démo        | 10 %      | **§7.1, Annexe C**         | A             |
 
 # Annexe E — Soutenance et démonstration (20 %)
 

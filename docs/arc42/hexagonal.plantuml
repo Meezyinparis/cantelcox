@@ -1,89 +1,70 @@
 @startuml
-title 5.2 — Structure interne du commerce-service (hexagonal)
+title 5.2 — Structure interne du commerce-service (hexagonal léger)
 
 skinparam packageStyle rectangle
 skinparam componentStyle uml2
 skinparam shadowing false
 
 package "Adapters d'entrée" {
-  component "commerce_api.py\nAPI REST" as API
-  component "controllers\nlines_controller.py\norders_controller.py\nusage_controller.py" as Controllers
+  component "commerce_api.py\nRoutes REST Flask" as API
+  component "controllers/\nplan, line, order,\nusage, invoice" as Controllers
 }
 
 package "Application\n(cas d'utilisation)" {
-  component "ActivateLineUseCase" as ActivateLine
-  component "CreateOrderUseCase" as CreateOrder
-  component "GetUsageAndInvoicesUseCase" as GetUsageInvoices
+  component "commands/\nécritures métier" as Commands
+  component "queries/\nlectures métier" as Queries
 }
 
-package "Domaine\n(cœur métier)" {
-  component "LigneMobile\n(agrégat)" as Ligne
-  component "Commande\n(agrégat)" as Commande
-  component "Facture\n(agrégat)" as Facture
-  component "Forfait\n(entité)" as Forfait
-  component "MSISDN\n(value object)" as MSISDN
-  component "UsageRecord\n(entité)" as Usage
-}
-
-package "Ports\n(interfaces)" {
-  interface "LineRepositoryPort" as LineRepoPort
-  interface "OrderRepositoryPort" as OrderRepoPort
-  interface "CatalogRepositoryPort" as CatalogRepoPort
-  interface "UsageRepositoryPort" as UsageRepoPort
-  interface "InvoiceRepositoryPort" as InvoiceRepoPort
-  interface "CachePort" as CachePort
-  interface "IdentityServicePort" as IdentityPort
+package "Domaine" {
+  component "Plan" as Plan
+  component "MobileLine\nMSISDN" as MobileLine
+  component "Order" as Order
+  component "OrderItem" as OrderItem
+  component "UsageRecord" as Usage
+  component "Invoice" as Invoice
 }
 
 package "Adapters de sortie\nInfrastructure" {
-  component "MySQL Repository" as MySQLRepo
-  component "Redis Cache Adapter" as RedisAdapter
-  component "HTTP Client\ncustomer-identity-service" as IdentityAdapter
+  component "db.py\nSQLAlchemy session" as DBAdapter
+  component "Redis client\ncache catalogue / usage" as RedisAdapter
+  component "HTTP client\nCustomer Identity" as IdentityAdapter
 }
 
-database "MySQL\nCommerce DB" as MySQL
-database "Redis\nCache catalogue / usage" as Redis
+database "MySQL\ncommerce_db" as MySQL
+database "Redis" as Redis
 component "customer-identity-service" as Identity
 
 API --> Controllers
 
-Controllers --> ActivateLine
-Controllers --> CreateOrder
-Controllers --> GetUsageInvoices
+Controllers --> Commands : opérations d'écriture
+Controllers --> Queries : opérations de lecture
 
-ActivateLine --> Ligne
-CreateOrder --> Commande
-GetUsageInvoices --> Usage
-GetUsageInvoices --> Facture
+Commands --> Plan
+Commands --> MobileLine
+Commands --> Order
+Commands --> OrderItem
+Commands --> Usage
+Commands --> Invoice
 
-Ligne --> MSISDN : possède
-Ligne --> Forfait : forfait actif
-Commande --> Forfait : forfait choisi
-Facture --> Ligne : concerne
+Queries --> Plan
+Queries --> MobileLine
+Queries --> Order
+Queries --> Usage
+Queries --> Invoice
 
-ActivateLine --> LineRepoPort
-ActivateLine --> IdentityPort
-ActivateLine --> CatalogRepoPort
+Order --> OrderItem
+OrderItem --> Plan
+MobileLine --> Plan
+Usage --> MobileLine
+Invoice --> MobileLine
 
-CreateOrder --> OrderRepoPort
-CreateOrder --> CatalogRepoPort
-CreateOrder --> IdentityPort
+Commands --> DBAdapter
+Queries --> DBAdapter
+Queries --> RedisAdapter
+Commands --> IdentityAdapter
 
-GetUsageInvoices --> UsageRepoPort
-GetUsageInvoices --> InvoiceRepoPort
-GetUsageInvoices --> CachePort
-
-LineRepoPort <|.. MySQLRepo
-OrderRepoPort <|.. MySQLRepo
-CatalogRepoPort <|.. MySQLRepo
-UsageRepoPort <|.. MySQLRepo
-InvoiceRepoPort <|.. MySQLRepo
-
-CachePort <|.. RedisAdapter
-IdentityPort <|.. IdentityAdapter
-
-MySQLRepo --> MySQL
+DBAdapter --> MySQL
 RedisAdapter --> Redis
-IdentityAdapter --> Identity
+IdentityAdapter --> Identity : validation auth / client
 
 @enduml

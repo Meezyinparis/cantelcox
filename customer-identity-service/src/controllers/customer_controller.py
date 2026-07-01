@@ -9,6 +9,7 @@ from flask import jsonify
 from commands.write_customer import add_customer, delete_customer
 from commands.write_user_account import add_user_account
 from queries.read_customer import get_customer_by_id
+from commands.write_audit_log import add_audit_log
 
 
 def create_customer(request):
@@ -38,11 +39,29 @@ def create_customer(request):
             password
         )
 
+        add_audit_log(
+            event_type="CUSTOMER_REGISTERED",
+            entity_type="Customer",
+            entity_id=customer_id,
+            actor_id=customer_id,
+            payload={
+                "email": email
+            }
+        )
+
         return jsonify({
             "customer_id": customer_id
         }), 201
 
     except Exception as e:
+        add_audit_log(
+            event_type="CUSTOMER_REGISTRATION_FAILED",
+            entity_type="Customer",
+            payload={
+                "email": email,
+                "error": str(e)
+            }
+        )
         return jsonify({
             "error": str(e)
         }), 500

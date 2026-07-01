@@ -3,6 +3,7 @@ from flask import jsonify
 
 from commands.write_order import add_order, delete_order
 from queries.read_order import get_order_by_id
+from commands.write_audit_log import add_audit_log
 
 
 def create_order(request):
@@ -27,11 +28,29 @@ def create_order(request):
         )
 
         if customer_response.status_code == 404:
+            add_audit_log(
+                event_type="ORDER_CREATION_FAILED",
+                entity_type="Order",
+                actor_id=customer_id,
+                payload={
+                    "line_id": line_id,
+                    "error": "Customer not found"
+                }
+            )
             return jsonify({
                 "error": "Customer not found"
             }), 404
 
         if customer_response.status_code != 200:
+            add_audit_log(
+                event_type="ORDER_CREATION_FAILED",
+                entity_type="Order",
+                actor_id=customer_id,
+                payload={
+                    "line_id": line_id,
+                    "error": "Could not validate customer"
+                }
+            )
             return jsonify({
                 "error": "Could not validate customer"
             }), 502
@@ -39,6 +58,15 @@ def create_order(request):
         customer = customer_response.json()
 
         if customer.get("status") != "ACTIVE":
+            add_audit_log(
+                event_type="ORDER_CREATION_FAILED",
+                entity_type="Order",
+                actor_id=customer_id,
+                payload={
+                    "line_id": line_id,
+                    "error": "Customer account is not active"
+                }
+            )
             return jsonify({
                 "error": "Customer account is not active"
             }), 403
@@ -50,11 +78,22 @@ def create_order(request):
             items
         )
 
+        add_audit_log(
+            event_type="ORDER_CREATED",
+            entity_type="Order",
+            entity_id=order_id,
+            actor_id=customer_id,
+            payload={
+                "line_id": line_id
+            }
+        )
+
         return jsonify({
             "order_id": order_id
         }), 201
 
     except requests.exceptions.RequestException:
+
         return jsonify({
             "error": "Identity service unavailable"
         }), 503

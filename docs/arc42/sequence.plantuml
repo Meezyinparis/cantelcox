@@ -27,6 +27,8 @@ A -> G : POST /v1/auth/mfa/verify
 G -> I : Valider OTP
 I --> G : MFA validé + JWT
 G --> A : Session sécurisée
+A -> G : POST /v1/auth/validate
+I --> G : JWT validé
 
 == UC-03 — Activation d'une ligne ==
 

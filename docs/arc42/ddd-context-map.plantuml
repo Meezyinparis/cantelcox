@@ -1,0 +1,21 @@
+@startuml
+title Carte des contextes DDD - CanTelcoX
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+rectangle "Customer Identity\nBounded Context" as Identity
+rectangle "Commerce\nBounded Context" as Commerce
+
+cloud "Infrastructure\nréseau mobile" as Network
+
+rectangle "Conformité & Audit" as Audit
+
+Identity --> Commerce : Customer / Supplier\nJWT
+Commerce --> Network : ACL
+
+Identity --> Audit : journalisation
+Commerce --> Audit : journalisation
+
+@enduml

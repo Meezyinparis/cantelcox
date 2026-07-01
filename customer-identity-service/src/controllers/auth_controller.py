@@ -9,6 +9,7 @@ from config import JWT_SECRET, JWT_ALGORITHM
 from commands.write_mfa_otp import add_mfa_otp, mark_otp_as_used
 from queries.read_mfa_otp import get_valid_otp
 from queries.read_user_account import get_user_account_by_email
+from commands.write_audit_log import add_audit_log
 
 
 def request_mfa(request):
@@ -46,6 +47,16 @@ def request_mfa(request):
         user_account["id"],
         otp_code,
         "LOGIN"
+    )
+
+    add_audit_log(
+        event_type="MFA_REQUESTED",
+        entity_type="UserAccount",
+        entity_id=user_account["id"],
+        actor_id=user_account["customer_id"],
+        payload={
+            "email": email
+        }
     )
 
     return jsonify({
@@ -92,7 +103,76 @@ def verify_mfa(request):
         algorithm=JWT_ALGORITHM
     )
 
+    add_audit_log(
+        event_type="MFA_VERIFIED",
+        entity_type="UserAccount",
+        entity_id=user_account["id"],
+        actor_id=user_account["customer_id"],
+        payload={
+            "email": email
+        }
+    )
+
     return jsonify({
         "message": "MFA verified",
         "token": token
     }), 200
+
+
+def validate_jwt(request):
+    """Validate JWT token"""
+
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header:
+        return jsonify({
+            "error": "Missing JWT token"
+        }), 401
+
+    if not auth_header.startswith("Bearer "):
+        return jsonify({
+            "error": "Invalid authorization format"
+        }), 401
+
+    token = auth_header.split(" ", 1)[1]
+
+    try:
+        payload = jwt.decode(
+            token,
+            JWT_SECRET,
+            algorithms=[JWT_ALGORITHM]
+        )
+
+        add_audit_log(
+            event_type="JWT_VALIDATED",
+            entity_type="UserAccount",
+            entity_id=payload["user_account_id"],
+            actor_id=payload["customer_id"]
+        )
+
+        return jsonify({
+            "valid": True,
+            "customer_id": payload["customer_id"],
+            "user_account_id": payload["user_account_id"],
+            "email": payload["email"]
+        }), 200
+
+    except jwt.ExpiredSignatureError:
+        add_audit_log(
+            event_type="JWT_EXPIRED",
+            entity_type="UserAccount"
+        )
+
+        return jsonify({
+            "error": "JWT has expired"
+        }), 401
+
+    except jwt.InvalidTokenError:
+        add_audit_log(
+            event_type="JWT_INVALID",
+            entity_type="UserAccount"
+        )
+
+        return jsonify({
+            "error": "Invalid JWT"
+        }), 401
