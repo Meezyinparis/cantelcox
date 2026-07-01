@@ -16,6 +16,23 @@ def create_order(request):
     idempotency_key = payload.get("idempotency_key")
     items = payload.get("items")
 
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header:
+        return jsonify({"error": "Missing JWT token"}), 401
+
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Invalid authorization format"}), 401
+
+    auth_response = requests.post(
+        "http://krakend:8080/v1/auth/validate",
+        headers={"Authorization": auth_header},
+        timeout=3
+    )
+
+    if auth_response.status_code != 200:
+        return jsonify({"error": "Invalid JWT"}), 401
+
     if not customer_id or not line_id or not idempotency_key or not items:
         return jsonify({
             "error": "customer_id, line_id, idempotency_key and items are required"
