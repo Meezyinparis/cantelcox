@@ -255,7 +255,7 @@ Catalogue de référence des UC du cahier :
 
 **Justification de la priorisation MoSCoW**
 
-Les cas d'utilisation UC-01 à UC-05 sont Must, car ils représentent les fonctionnalités essentielles permettant à un abonné de créer un compte, se connecter, activer une ligne mobile, souscrire à un forfait et consulter son usage. Ensemble, ils constituent le parcours principal de la plateforme et permettent de démontrer les principaux concepts du projet, tels que l'architecture microservices, la communication entre services, la persistance des données et l'observabilité. Les UC-06 (Paiement de facture), UC-07 (Détection de fraude) et UC-08 (Cycle de facturation mensuel) ont été priorisés respectivement comme Should et Could, puisqu'ils reposent sur des traitements plus avancés et peuvent être ajoutés dans autre phase.
+Les cas d'utilisation UC-01 à UC-05 ont été classés Must, car ils couvrent les fonctionnalités de base de la plateforme : créer un compte, s'authentifier, activer une ligne mobile, souscrire à un forfait et consulter son usage. Ils représentent le parcours principal d'un abonné et permettent de mettre en pratique les principaux concepts du projet, comme les microservices, la communication entre services, la persistance des données et l'observabilité. Les UC-06 (Paiement de facture), UC-07 (Détection de fraude) et UC-08 (Cycle de facturation mensuel) ont été classés Should ou Could, puisqu'ils correspondent à des fonctionnalités plus avancées qui pourront être ajoutées dans une prochaine phase.
 
 **Matrice de traçabilité UC ↔ domaines du cahier (bounded contexts)**
 
@@ -810,9 +810,9 @@ Synthèse ; le détail des mesures et les captures figurent aux §10.5 à §10.8
 
 ## 10.4 Stratégie de tests & couverture
 
-La stratégie de tests suit une pyramide simple : tests unitaires, tests d'intégration et tests bout-en-bout. Les tests unitaires avec `pytest` valident les fonctions critiques des services, notamment la création de clients, la demande MFA, la vérification MFA, la consultation des forfaits, l'activation de ligne, la création de commande, la consultation d'usage et la consultation des factures.
+La stratégie de tests suit une pyramide simple : tests unitaires et tests d'intégration. Les tests unitaires avec `pytest`.
 
-Les tests d'intégration sont exécutés dans Docker Compose afin de vérifier les interactions réelles entre les microservices, MySQL, Redis et KrakenD. Les collections Postman servent à valider manuellement les API REST exposées par la Gateway et à démontrer les scénarios métier principaux.
+Les tests d'intégration sont exécutés dans Docker Compose afin de vérifier les interactions réelles entre les microservices, MySQL, Redis et KrakenD. Les collections Postman servent à valider manuellement les API REST exposées par la Gateway.
 
 Le scénario E2E principal couvre le parcours suivant : inscription d'un client, demande d'un code MFA, vérification du MFA, activation d'une ligne mobile, souscription à un forfait, consultation de l'usage et consultation des factures. Ce scénario permet de vérifier la cohérence entre le `customer-identity-service`, le `commerce-service` et l'API Gateway.
 
@@ -897,13 +897,13 @@ _Tolérance aux pannes (kill d’instance en charge) : [À compléter — mainti
 | ------------------------ | --------------------------------------------------------------------------------- | ------------------- |
 | **MSISDN**               | Numéro de téléphone unique associé à une ligne mobile.                            | Commerce            |
 | **Forfait**              | Offre commerciale comprenant des quotas de données, voix et SMS.                  | Commerce            |
-| **Ligne mobile**         | Service mobile activé pour un client, identifié par un MSISDN et une carte SIM.   | Commerce            |
+| **Ligne mobile**         | Service mobile activé pour un client avec un MSISDN et une carte SIM.   | Commerce            |
 | **Commande**             | Demande de souscription à un ou plusieurs forfaits.                               | Commerce            |
 | **Facture**              | Document regroupant les frais d'un cycle de facturation.                          | Commerce            |
 | **Consommation (Usage)** | Quantité de données, minutes et SMS utilisée par une ligne mobile.                | Commerce            |
-| **Client**               | Personne inscrite auprès de CanTelcoX.                                            | Customer Identity   |
+| **Client**               | Personne inscrite dams CanTelcoX.                                            | Customer Identity   |
 | **Compte utilisateur**   | Compte servant à l'authentification de l'utilisateur (courriel et mot de passe).  | Customer Identity   |
-| **MFA**                  | Authentification multifacteur utilisant un code OTP avant une opération sensible. | Customer Identity   |
+| **MFA**                  | Authentification multifacteur avec un code OTP avant une opération sensible. | Customer Identity   |
 | **OTP**                  | Code à usage unique utilisé pour valider une authentification MFA.                | Customer Identity   |
 | **JWT**                  | Jeton d'authentification remis après une validation MFA réussie.                  | Customer Identity   |
 
@@ -1172,7 +1172,7 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 <td>§10.4</td>
 <td>§10.4 ; §6.1</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
+<td><p> Livrable</p>
 <p>☐ CA</p></td>
 </tr>
 <tr class="odd">
