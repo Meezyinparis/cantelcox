@@ -7,18 +7,21 @@ from customer_identity_api import app
 
 @pytest.fixture
 def client():
+    """Create a test client"""
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
 
 
 def test_health(client):
+    """Test the health endpoint"""
     result = client.get("/health")
     assert result.status_code == 200
     assert result.get_json()["status"] == "healthy"
 
 
 def test_customer_identity_flow(client):
+    """Test the customer identity flow"""
     logger = Logger.get_instance("test")
 
     random_email = f"test-{uuid.uuid1()}@example.com"

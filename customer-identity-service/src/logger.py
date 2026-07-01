@@ -1,8 +1,3 @@
-"""
-Logger
-SPDX-License-Identifier: LGPL-3.0-or-later
-Auteurs: Gabriel C. Ullmann, Fabio Petrillo, 2025
-"""
 import logging
 import sys
 
@@ -23,18 +18,15 @@ class Logger:
             datefmt='%Y-%m-%d %H:%M:%S'
         )
 
-
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setLevel(level)
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
 
-
         if (log_to_file):
             fileHandler = logging.FileHandler("cantelcox.log")
             fileHandler.setFormatter(formatter)
             logger.addHandler(fileHandler)
-
 
         logging.root.setLevel(logging.WARNING)
 

@@ -1,9 +1,3 @@
-"""
-Customer controller
-SPDX - License - Identifier: LGPL - 3.0 - or -later
-Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2025
-"""
-
 from flask import jsonify
 
 from commands.write_customer import add_customer, delete_customer

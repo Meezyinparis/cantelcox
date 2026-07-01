@@ -69,6 +69,7 @@ def post_validate_jwt():
 
 @app.errorhandler(404)
 def handle_404(error):
+    """Handle missing routes"""
     logger.error(error)
     return jsonify({
         "code": "NOT_FOUND",
@@ -79,6 +80,7 @@ def handle_404(error):
 
 @app.errorhandler(500)
 def handle_500(error):
+    """Handle server errors"""
     logger.exception(error)
     return jsonify({
         "code": "INTERNAL_ERROR",

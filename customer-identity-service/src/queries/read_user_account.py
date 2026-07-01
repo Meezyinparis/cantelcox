@@ -20,7 +20,6 @@ def get_user_account_by_id(account_id):
             "customer_id": account.customer_id,
             "email": account.email,
             "password_hash": account.password_hash,
-            "mfa_enabled": account.mfa_enabled
         }
 
     return {}
@@ -44,7 +43,6 @@ def get_user_account_by_email(email):
             "customer_id": account.customer_id,
             "email": account.email,
             "password_hash": account.password_hash,
-            "mfa_enabled": account.mfa_enabled
         }
 
     return {}

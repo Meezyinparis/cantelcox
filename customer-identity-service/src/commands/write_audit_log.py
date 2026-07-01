@@ -10,6 +10,7 @@ def add_audit_log(
     trace_id=None,
     payload=None
 ):
+    """Write an audit log entry"""
     session = get_sqlalchemy_session()
 
     try:
