@@ -610,11 +610,11 @@ Agrégats clés à modéliser (un diagramme par bounded context retenu) :
 
 | **Capacité Gateway** | **Mise en œuvre**                                                                                                                                                                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Routage              | Routes `/v1/auth/*` et `/v1/customers/*` vers `customer-identity-service`; routes `/v1/catalog/*`, `/v1/orders/*`, `/v1/lines/*`, `/v1/usage/*` et `/v1/invoices/*` vers `commerce-service`. |
-| En-têtes             | Transmission des headers `Authorization`, `Content-Type` et `Idempotency-Key`.                                                                                                               |
-| Produit retenu       | `KrakenD` — point d'entrée unique des appels API et routage vers les microservices internes.                                                                                                 |
-| Timeout              | Délai maximal de réponse de `3 s`.                                                                                                                                                           |
-| Throttling / quota   | Limite simple configurée sur certaines routes sensibles, par exemple `100 requêtes/minute`.                                                                                                  |
+| Routage              | Routes `/v1/auth/*` et `/v1/customers/*` vers customer-identity-service; routes `/v1/catalog/*`, `/v1/orders/*`, `/v1/lines/*`, `v1/usage/* et /v1/invoices/* vers commerce-service. |
+| En-têtes             | Transmission des headers Authorization, Content-Type et Idempotency-Key.                                                                                                               |
+| Produit retenu       | KrakenD: point d'entrée unique des appels API et routage vers les microservices internes.                                                                                                 |
+| Timeout              | Délai maximal de réponse de 3 s.                                                                                                                                                           |
+| Throttling / quota   | Limite simple configurée sur certaines routes sensibles, par exemple 100 requêtes/minute.                                                                                                  |
 
 ## 7.3 Load balancing & tolérance aux pannes
 
@@ -650,21 +650,19 @@ _[À compléter — amont (NGINX/HAProxy/Traefik), stratégie d’équilibrage, 
 
 ## 8.1 Persistance & intégrité
 
-La persistance est séparée par microservice : identity_db pour le customer-identity-service et commerce_db pour le commerce-service. SQLAlchemy est utilisé comme ORM avec une séparation commands/queries. L'intégrité est assurée par des clés étrangères et des contraintes d'unicité (`email`, `msisdn`, `sim_number`, `idempotency_key`, `(customer_id, line_id, billing_cycle)`).
+La persistance est séparée par microservice : identity_db pour le customer-identity-service et commerce_db pour le commerce-service. SQLAlchemy est utilisé comme ORM avec une séparation commands/queries. L'intégrité est assurée par des clés étrangères et des contraintes d'unicité (email, msisdn, sim_number, idempotency_key, customer_id, line_id, billing_cycle).
 
 ## 8.2 Idempotence (commandes & activations)
 
-Les commandes utilisent une clé `Idempotency-Key` unique afin d'éviter les traitements en double. Cette clé est stockée dans la base de données (`UNIQUE`) et une même requête retourne toujours le même résultat. Une requête différente avec une clé déjà utilisée est rejetée (`409 Conflict`).
+Les commandes utilisent une clé Idempotency-Key unique afin d'éviter les traitements en double. Cette clé est stockée dans la base de données (UNIQUE) et une même requête retourne toujours le même résultat. Une requête différente avec une clé déjà utilisée est rejetée (409 Conflict).
 
 ## 8.3 Exactly-once (facturation)
 
-La facturation garantit une seule création de facture par `customer_id`, `line_id` et `billing_cycle` grâce à une contrainte `UNIQUE` en base de données. La création de la facture est exécutée dans une transaction afin d'assurer la cohérence des données.
-
-La génération de facture est exécutée dans une transaction : création de la facture, ajout des lignes de facture et écriture dans le journal d'audit. Si une erreur survient, toute la transaction est annulée. Pour les événements liés à la facturation, une table `outbox_events` peut être utilisée afin d'enregistrer l'événement dans la même transaction que la facture, puis de le publier ensuite de manière fiable.
+La facturation garantit une seule création de facture par customer_id, line_id et billing_cycle grâce à une contrainte UNIQUE en base de données. La création de la facture est exécutée dans une transaction afin d'assurer la cohérence des données.
 
 ## 8.4 Journal d’audit append-only (CRTC / Loi 25)
 
-Les opérations importantes (inscription, MFA, activation de ligne, commandes et facturation) sont enregistrées dans une table d'audit append-only. Les événements sont uniquement ajoutés, jamais modifiés ni supprimés, afin d'assurer la traçabilité et de répondre aux exigences du CRTC et de la Loi 25.
+Les opérations importantes (inscription, MFA, activation de ligne, commandes et facturation) sont enregistrées dans une table d'audit append-only. Les événements sont uniquement ajoutés, jamais modifiés ni supprimés pour répondre aux exigences du CRTC et de la Loi 25.
 
 ## 8.5 Sécurité applicative
 
@@ -674,15 +672,15 @@ Les opérations importantes (inscription, MFA, activation de ligne, commandes et
 | MFA / OTP                   | OTP requis pour l'authentification et les opérations sensibles (UC-02, UC-03)              |
 | CORS                        | Seules les origines autorisées (frontend local et outils de test) peuvent accéder à l'API  |
 | Validation / assainissement | Validation des entrées, vérification des formats et nettoyage des données avant traitement |
-| Gestion des secrets         | Variables d'environnement (aucun secret en clair)                                          |
+| Gestion des secrets         | Variables d'environnement                                    |
 
 ## 8.6 Contrôles anti-fraude
 
-L'authentification MFA est requise avant les opérations sensibles, comme l'activation d'une ligne. Les actions importantes sont consignées dans le journal d'audit afin d'assurer la traçabilité et de faciliter la détection d'activités inhabituelles.
+L'authentification MFA est requise avant les opérations sensibles, comme l'activation d'une ligne. Les actions importantes sont insérées dans le journal d'audit pour assurer la tracibilité si jamais il y a un problème.
 
 ## 8.7 Gestion d'erreurs & versionnement
 
-Les API utilisent des réponses JSON avec les codes HTTP appropriés (`400`, `401`, `403`, `404`, `409`, `500`). Toutes les API sont versionnées avec le préfixe `/v1` afin de permettre l'évolution des services tout en conservant la compatibilité avec les clients existants.
+Les API utilisent des réponses JSON avec les codes HTTP appropriés (`400`, `401`, `403`, `404`, `409`, `500`). Toutes les API sont versionnées avec le préfixe `/v1`.
 
 ## 8.8 Observabilité (4 Golden Signals)
 
@@ -732,7 +730,7 @@ Les données les plus consultées sont mises en cache dans Redis afin de réduir
 |---|---|
 | **Statut** | Accepté |
 | **Contexte** | Le projet doit être basé sur des microservices, respecter les bounded contexts DDD et être facilement déployable avec Docker Compose. |
-| **Décision** | Utiliser une architecture microservices avec deux services implémentés pour la phase 1 (`customer-identity-service` et `commerce-service`) exposés via une API Gateway (KrakenD). Chaque service suit une architecture hexagonale légère. |
+| **Décision** | Utiliser une architecture microservices avec deux services implémentés pour la phase 1 (customer-identity-service et commerce-service) exposés via une API Gateway (KrakenD). Chaque service suit une architecture hexagonale légère. |
 | **Conséquences** | **Positives :** meilleure séparation des responsabilités, évolution indépendante des services, conformité avec le DDD. **Négatives :** communications réseau supplémentaires, configuration et déploiement plus complexes qu'un monolithe. |
 | **Exigence du cahier tracée** | Analyse métier & DDD, Architecture distribuée, Microservices & API Gateway (sections 1, 2 et 4 de la grille). |                                                                                                                     |
 
