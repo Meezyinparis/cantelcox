@@ -9,4 +9,3 @@ class UserAccount(Base):
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    mfa_enabled = Column(Boolean, default=True)

@@ -1018,8 +1018,8 @@ Cochez chaque case (☐) lorsque le livrable est produit et le critère d’acce
 <td>§3.1, §3.3, §5.3, §12.1</td>
 <td>§12.1 ; §5.3 ; §3.3+§4.1</td>
 <td><em>[…]</em></td>
-<td><p>☐ Livrable</p>
-<p>☐ CA</p></td>
+<td><p>x Livrable</p>
+<p>x CA</p></td>
 </tr>
 <tr class="even">
 <td colspan="5"><strong>2) Architecture &amp; décisions</strong></td>
