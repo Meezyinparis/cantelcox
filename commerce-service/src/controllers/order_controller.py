@@ -41,7 +41,7 @@ def create_order(request):
     try:
         customer_response = requests.get(
             f"http://krakend:8080/v1/customers/{customer_id}",
-            timeout=5
+            timeout=3
         )
 
         if customer_response.status_code == 404:

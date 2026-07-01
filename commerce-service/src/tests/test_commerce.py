@@ -20,6 +20,18 @@ class MockAuthResponse:
         }
 
 
+class MockCustomerResponse:
+    def __init__(self, status_code=200):
+        self.status_code = status_code
+
+    def json(self):
+        return {
+            "id": 1,
+            "email": "test@example.com",
+            "status": "ACTIVE"
+        }
+
+
 @pytest.fixture
 def client():
     app.config["TESTING"] = True
@@ -35,7 +47,14 @@ def mock_valid_jwt(monkeypatch):
 
         return MockAuthResponse(404)
 
+    def fake_get(url, timeout=3, **kwargs):
+        if "/v1/customers/" in url:
+            return MockCustomerResponse(200)
+
+        return MockCustomerResponse(404)
+
     monkeypatch.setattr(requests, "post", fake_post)
+    monkeypatch.setattr(requests, "get", fake_get)
 
 
 def auth_headers(extra=None):
