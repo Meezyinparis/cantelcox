@@ -5,13 +5,27 @@ import requests
 from commerce_api import app
 
 
-class MockIdentityResponse:
-    def __init__(self, status_code, payload):
+class MockAuthResponse:
+    def __init__(self, status_code):
         self.status_code = status_code
-        self.payload = payload
 
     def json(self):
-        return self.payload
+        return {
+            "valid": True,
+            "customer_id": 1,
+            "user_account_id": 1,
+            "email": "test@example.com"
+        }
+
+
+@pytest.fixture
+def mock_valid_jwt(monkeypatch):
+    def fake_post(url, headers=None, timeout=3, **kwargs):
+        if "/v1/auth/validate" in url:
+            return MockAuthResponse(200)
+        return MockAuthResponse(404)
+
+    monkeypatch.setattr(requests, "post", fake_post)
 
 
 @pytest.fixture
@@ -48,7 +62,7 @@ def test_catalog_plans(client):
     assert "name" in plans[0]
 
 
-def test_activate_line_success_or_db_error(client):
+def test_activate_line_success_or_db_error(client, mock_valid_jwt):
     line_data = {
         "customer_id": 1,
         "msisdn": f"514{str(uuid.uuid4().int)[:7]}",
@@ -86,7 +100,7 @@ def test_activate_line_missing_token(client):
     assert response.status_code == 401
 
 
-def test_activate_line_missing_fields(client):
+def test_activate_line_missing_fields(client, mock_valid_jwt):
     line_data = {
         "customer_id": 1,
         "msisdn": "5145551234"
@@ -102,7 +116,7 @@ def test_activate_line_missing_fields(client):
     assert response.status_code == 400
 
 
-def test_create_order_success_or_db_error(client):
+def test_create_order_success_or_db_error(client, mock_valid_jwt):
     order_data = {
         "customer_id": 1,
         "line_id": 1,
@@ -154,7 +168,7 @@ def test_create_order_missing_token(client):
     assert response.status_code in [401, 400]
 
 
-def test_create_order_missing_fields(client):
+def test_create_order_missing_fields(client, mock_valid_jwt):
     order_data = {
         "customer_id": 1,
         "line_id": 1,
